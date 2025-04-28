@@ -5,10 +5,40 @@
 
 ![test](./markdown/setting.PNG)
 
-npm install --legacy-peer-deps
+라이브러리 다운 : npm install --legacy-peer-deps
 
-npx shadcn@latest add button
-npx shadcn@latest add navigation-menu
+```
+vs code seeting.json
+
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "workbench.iconTheme": "material-icon-theme",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ],
+  "files.eol": "\n",
+  // ✅ Prettier 옵션 명시적으로 추가
+  "prettier.singleQuote": false,
+  "prettier.semi": true,
+  "prettier.useTabs": false,
+  "prettier.tabWidth": 2,
+  "prettier.trailingComma": "all",
+  "prettier.printWidth": 80,
+  "prettier.bracketSpacing": true,
+  "prettier.arrowParens": "always",
+  "explorer.confirmDragAndDrop": false,
+  "typescript.updateImportsOnFileMove.enabled": "always"
+}
+
+```
+
+
 
 ```
 typeScript : Yes
