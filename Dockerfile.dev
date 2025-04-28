@@ -1,0 +1,32 @@
+FROM node:20-bullseye
+
+WORKDIR /app
+
+COPY package*.json ./
+
+COPY . .
+
+# RUN npm install
+RUN npm install --legacy-peer-deps
+
+# ShadCN UI 컴포넌트 추가 (button, navigation-menu 등)
+# RUN npx shadcn@latest add button
+# RUN npx shadcn@latest add navigation-menu
+# RUN npx shadcn@latest add label
+# RUN npx shadcn@latest add card
+# RUN npx shadcn@latest add checkbox
+# RUN npx shadcn@latest add accordion
+# RUN npx shadcn@latest add pagination
+# RUN npx shadcn@latest add tabs
+# RUN npx shadcn@latest add textarea
+
+# RUN npx shadcn@latest add select
+# RUN npx shadcn@latest add radio-group
+# RUN npx shadcn@latest add calendar
+# RUN npx shadcn@latest add popover
+# RUN npx shadcn@latest add avatar
+# RUN npx shadcn@latest add tooltip
+# RUN npx shadcn@latest add dialog
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]

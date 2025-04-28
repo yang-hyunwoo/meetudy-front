@@ -1,0 +1,168 @@
+/* 에디터 전체 wrapper */
+.tiptap-editor-wrapper {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 12px;
+  background-color: transparent;
+  color: inherit;
+}
+
+/* 툴바 */
+.tiptap-toolbar {
+  display: flex; /* 이걸 명시해야 함 */
+  flex-wrap: wrap; /* 모바일에서 줄바꿈 */
+  gap: 8px; /* 버튼 사이 간격 */
+  margin-bottom: 10px;
+  background-color: #2a2a2a;
+  padding: 6px 10px;
+  border-radius: 6px;
+  width: 100%; /* 추가 */
+  align-items: center; /* 버튼 수직 중앙 정렬 */
+}
+
+/* 툴바 버튼 공통 */
+.tiptap-toolbar button {
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+/* 다크 모드 */
+.tiptap-toolbar.tiptap-dark {
+  background-color: #2a2a2a;
+  border-bottom-color: #444;
+}
+
+.tiptap-toolbar.tiptap-dark button {
+  background: #444;
+  color: #f0f0f0;
+}
+
+.tiptap-toolbar.tiptap-dark button:hover {
+  background: #555;
+}
+
+/* 라이트 모드 */
+.tiptap-toolbar.tiptap-light {
+  background-color: #f9f9f9;
+  border-bottom-color: #ddd;
+}
+
+.tiptap-toolbar.tiptap-light button {
+  background: #e0e0e0;
+  color: #222;
+}
+
+.tiptap-toolbar.tiptap-light button:hover {
+  background: #d0d0d0;
+}
+
+/* active 상태 */
+.tiptap-toolbar button.active {
+  background: #0070f3;
+  color: #fff;
+}
+
+/* 에디터 본문 영역 */
+.ProseMirror.tiptap-dark {
+  background-color: #1e1e1e;
+  color: #f1f1f1;
+  padding: 12px;
+  border-radius: 4px;
+  outline: none;
+}
+
+.ProseMirror.tiptap-light {
+  background-color: #fff;
+  color: #000;
+  padding: 12px;
+  border-radius: 4px;
+  outline: none;
+}
+
+.ProseMirror.tiptap-dark,
+.ProseMirror.tiptap-light {
+  min-height: 300px;
+  max-height: 500px; /* 👉 스크롤 필요 시 생기도록 최대 높이 설정 */
+  overflow-y: auto; /* 👉 내용이 넘치면 스크롤 */
+  padding: 16px;
+  border-radius: 6px;
+  outline: none;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+/* 리사이저 이미지 영역 */
+.resizable-image-wrapper {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  margin: 8px 0;
+}
+
+.resizable-image-wrapper img {
+  display: block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.resize-handle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 10px;
+  height: 10px;
+  background-color: #0070f3;
+  border-radius: 50%;
+  cursor: se-resize;
+}
+
+/* 코드 블록 스타일 */
+.ProseMirror pre {
+  background: #2d2d2d;
+  color: #f8f8f2;
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: "Fira Code", "Consolas", monospace;
+  font-size: 0.95em;
+  margin: 8px 0;
+}
+
+.ProseMirror code {
+  background: rgba(135, 131, 120, 0.15);
+  color: #f8f8f2;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-family: "Fira Code", "Consolas", monospace;
+}
+
+/* 링크 스타일 */
+.ProseMirror a {
+  color: #3b82f6; /* 파란색 */
+  text-decoration: underline;
+}
+
+/* 헤딩 스타일 */
+.ProseMirror h1 {
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin: 1em 0 0.5em;
+}
+
+.ProseMirror h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 1em 0 0.5em;
+}
+
+.ProseMirror h3 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin: 1em 0 0.5em;
+}
