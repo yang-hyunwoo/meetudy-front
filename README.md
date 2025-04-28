@@ -8,7 +8,7 @@
 라이브러리 다운 : npm install --legacy-peer-deps
 
 ```
-vs code seeting.json
+vs code settings.json
 
 {
   "editor.formatOnSave": true,
