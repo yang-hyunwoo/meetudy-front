@@ -126,18 +126,18 @@ export default function Header({ isLoggedIn, onLogout }: HeaderProps) {
                   로그인
                 </Button>
               </Link>
-              {/* <Link
+              <Link
                 href="/join"
                 className="text-xs text-blue-500 hover:underline dark:text-blue-400"
               >
                 회원가입 →
-              </Link> */}
-              <Link
+              </Link>
+              {/* <Link
                 href="/password/change"
                 className="text-xs text-blue-500 hover:underline dark:text-blue-400"
               >
-                회원가입 →
-              </Link>
+                비밀번호 변경 페이지
+              </Link> */}
             </div>
           )}
 

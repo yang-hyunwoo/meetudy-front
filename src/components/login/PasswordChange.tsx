@@ -81,7 +81,7 @@ export default function ForcePasswordChangePage() {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
 
         <div className="flex flex-col sm:flex-row gap-4 pt-4">
           <Button
