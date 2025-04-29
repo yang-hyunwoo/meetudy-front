@@ -1,9 +1,3 @@
-// import MyPageForm from "@/components/mypage/MypageForm";
-
-// export default function MyPagePage() {
-//   return <MyPageForm />;
-// }
-
 import MyPageTabs from "@/components/mypage/MyPageTabs";
 
 export default function MyPagePage() {
