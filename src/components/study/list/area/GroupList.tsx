@@ -4,8 +4,8 @@ import { useState } from "react";
 import CustomPagination from "@/components/common/pagination/Pagination";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import OtpModal from "@/components/common/otp/OtpModal"; // 경로는 프로젝트에 맞게
-import { useTheme } from "next-themes"; // ✅ 추가
+import OtpModal from "@/components/common/otp/OtpModal";
+import { useTheme } from "next-themes";
 import GroupSearchBar from "@/components/study/list/area/GroupSearchBar";
 import GroupListItem from "@/components/study/list/area/GroupListItem";
 import { useEffect } from "react";

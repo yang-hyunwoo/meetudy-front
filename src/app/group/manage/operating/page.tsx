@@ -7,18 +7,21 @@ export default function JoinedGroupOperatingPage() {
       name: "프론트엔드 스터디",
       thumbnail: "/images/study-thumbnail-1.jpg",
       memberCount: 10,
+      isClosed: false,
     },
     {
       id: "2",
       name: "백엔드 스터디",
       thumbnail: "/images/study-thumbnail-2.jpg",
       memberCount: 8,
+      isClosed: false,
     },
     {
       id: "3",
       name: "CS 스터디",
       thumbnail: "/images/study-thumbnail-3.jpg",
       memberCount: 15,
+      isClosed: true,
     },
   ];
 
