@@ -30,10 +30,6 @@ export default function BoardList({ posts, isLoggedIn }: BoardListProps) {
     setCurrentPage(1);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") handleSearch();
-  };
-
   const filteredPosts = posts.filter(
     (post) =>
       post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

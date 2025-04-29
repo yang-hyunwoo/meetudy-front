@@ -121,11 +121,9 @@
   }
 }
 
-/* ✅ 기존 global 스타일은 그대로 두시고, 아래만 추가하세요 */
+/* ✨ 다크모드 최적화
 
-/* ✨ 다크모드 최적화 */
 
-/* 텍스트 색상 개선 */
 .dark .text-gray-800 {
   color: #f5f5f5;
 }
@@ -136,7 +134,7 @@
   color: #b0b0b0;
 }
 
-/* 버튼 스타일 개선 */
+
 .dark button {
   border: 1px solid #444;
 }
@@ -144,7 +142,6 @@
   background-color: #333;
 }
 
-/* 입력(Input), 셀렉트(Select) 스타일 개선 */
 .dark input,
 .dark select,
 .dark textarea {
@@ -159,50 +156,44 @@
   outline: none;
 }
 
-/* 테두리(border) 색상 개선 */
 .dark hr,
 .dark .border-gray-300 {
   border-color: #555;
 }
 
-/* 카드나 버튼에 그림자 추가 */
 .dark .card,
 .dark .button {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-/* 리스트 호버 시 부드럽게 */
 .dark li:hover {
   background-color: #2a2a2a;
 }
 
-/* 배경 약간 밝게 조정 (선택사항) */
 .dark .bg-gray-100 {
   background-color: #2a2a2a;
 }
 
-/* 선택된 상태 강조 (예: active tab 등) */
 .dark .selected {
   background-color: #3a3a3a;
   color: #ffffff;
 }
 
-/* 폼 제목(label) 강조 */
 .dark label {
   color: #dddddd;
 }
+ */
 
-/* ✨ 라이트모드 최적화 */
+/* ✨ 라이트모드 최적화 
 
-/* 기본 텍스트 진하게 */
 .text-gray-800 {
-  color: #1a1a1a; /* 거의 검정색 */
+  color: #1a1a1a; 
 }
 .text-gray-600 {
-  color: #4b5563; /* 진회색 */
+  color: #4b5563; 
 }
 
-/* 버튼 스타일 강화 */
+
 button {
   border: 1px solid #ccc;
 }
@@ -210,7 +201,7 @@ button:hover {
   background-color: #e5e5e5;
 }
 
-/* Input, Select, Textarea */
+
 input,
 select,
 textarea {
@@ -225,14 +216,13 @@ textarea:focus {
   outline: none;
 }
 
-/* 경계선(Border) 색상 조정 */
 hr,
 .border-gray-300 {
   border-color: #bcbcbc;
 }
 
-/* 카드, 버튼 기본 그림자 추가 */
 .card,
 .button {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
+  */

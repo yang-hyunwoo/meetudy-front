@@ -1,17 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import Link from "next/link";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import ProfileCard from "@/components/mypage/ProfileCard";
 import ActivitySummaryCard from "@/components/mypage/ActivitySummaryCard";
 import ChangePasswordDialog from "@/components/mypage/ChangePasswordDialog";

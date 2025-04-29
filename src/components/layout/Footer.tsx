@@ -18,7 +18,7 @@ export default function Footer() {
             tistory
           </Link>
           <Link
-            href="https://github.com/yang-hyunwoo/meetudy-frontend"
+            href="https://github.com/yang-hyunwoo/meetudy-front"
             className="hover:underline"
             target="_blank"
           >

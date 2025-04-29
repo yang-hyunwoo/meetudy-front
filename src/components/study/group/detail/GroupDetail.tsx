@@ -2,8 +2,8 @@
 
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import { MessageSquare, Users, Lock } from "lucide-react";
-import OtpModal from "@/components/common/otp/OtpModal"; // 경로는 프로젝트에 맞게
+import { MessageSquare } from "lucide-react";
+import OtpModal from "@/components/common/otp/OtpModal";
 import StudyCommentList from "@/components/common/comment/CommentList";
 import StudyCommentForm from "@/components/common/comment/CommentForm";
 import GroupJoinSection from "@/components/study/group/detail/GroupJoinSection";

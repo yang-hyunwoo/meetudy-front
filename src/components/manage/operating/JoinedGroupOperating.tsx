@@ -17,6 +17,7 @@ interface JoinedGroup {
   name: string;
   thumbnail: string;
   memberCount: number;
+  isClosed: boolean;
 }
 
 interface JoinedGroupOperatingProps {
@@ -33,6 +34,10 @@ export default function JoinedGroupOperating({
   const [attendanceRate, setAttendanceRate] = useState<number>(0);
   const [attendanceDates, setAttendanceDates] = useState<string[]>([]);
   const [pendingMembers, setPendingMembers] = useState<Member[]>([]);
+  const [groupStatuses, setGroupStatuses] = useState<Record<string, boolean>>(
+    {},
+  );
+
   const attendanceData: Record<string, { rate: number; dates: string[] }> = {
     "user-1": {
       rate: 92,
@@ -136,7 +141,12 @@ export default function JoinedGroupOperating({
       setAttendanceDates([]);
     }
   };
-
+  const handleToggleClose = (groupId: string) => {
+    setGroupStatuses((prev) => ({
+      ...prev,
+      [groupId]: !prev[groupId],
+    }));
+  };
   const handleCardClick = async (groupId: string) => {
     if (selectedGroupId === groupId) {
       setSelectedGroupId(null);
@@ -196,6 +206,7 @@ export default function JoinedGroupOperating({
             name={group.name}
             thumbnail={group.thumbnail}
             memberCount={group.memberCount}
+            isClosed={groupStatuses[group.id] ?? group.isClosed} // ✅ groupStatuses 먼저 보고, 없으면 group.isClosed
             onClick={() => handleCardClick(group.id)}
             onEdit={() => {
               alert("수정");
@@ -203,6 +214,7 @@ export default function JoinedGroupOperating({
             onDelete={() => {
               if (confirm("삭제하시겠습니까?")) alert("삭제 완료");
             }}
+            onToggleClose={() => handleToggleClose(group.id)}
           />
         ))}
       </div>
