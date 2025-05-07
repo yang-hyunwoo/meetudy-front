@@ -2,15 +2,29 @@ import axios from "axios";
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  withCredentials: true, // ✅ 쿠키 자동 포함 (중요)
+  withCredentials: true, // ✅ 쿠키 자동 포함 (refreshToken 용)
 });
 
-// 👉 Request interceptor 필요 없음
+// ✅ 여기에 Request Interceptor 추가
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("accessToken");
+  if (token) {
+    config.headers.Authorization = `${token}`;
+  }
+  return config;
+});
 
+// ✅ 기존의 Response Interceptor는 그대로 둬도 OK
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const newToken = response.headers["authorization"];
+    if (newToken) {
+      localStorage.setItem("accessToken", newToken);
+    }
+    return response;
+  },
   async (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.data.errCode === 401) {
       alert("로그인이 필요합니다.");
       window.location.href = "/login";
     }

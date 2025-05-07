@@ -7,18 +7,40 @@ import Image from "next/image";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import SocialLoginButtons from "@/components/login/SocialLoginButtons";
+import { api } from "@/lib/axios";
+import axios from "axios";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-
+  const [errorMessage, setErrorMessage] = useState("");
   useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    localStorage.removeItem("accessToken");
+  }, []);
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Logging in with", { email, password });
+    try {
+      const res = await api.post("/api/login", {
+        email,
+        password,
+      });
+      localStorage.setItem("accessToken", res.headers["authorization"]);
+      console.log(localStorage.getItem("accessToken"));
+      window.location.href = "/";
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        // AxiosError만 처리
+        const message =
+          error.response?.data?.message || "로그인에 실패했습니다.";
+        setErrorMessage(message);
+      } else {
+        setErrorMessage("알 수 없는 오류가 발생했습니다.");
+      }
+    }
   };
 
   return (
@@ -92,7 +114,12 @@ export default function Login() {
               required
             />
           </div>
-          <Button type="submit" className="w-full mt-2">
+          {errorMessage && (
+            <div className="text-sm text-red-500 text-center -mt-2">
+              {errorMessage}
+            </div>
+          )}
+          <Button onClick={handleSubmit} className="w-full mt-2">
             로그인
           </Button>
         </form>
