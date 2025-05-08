@@ -9,6 +9,7 @@ import Link from "next/link";
 import SocialLoginButtons from "@/components/login/SocialLoginButtons";
 import { api } from "@/lib/axios";
 import axios from "axios";
+import Spinner from "@/components/ui/Spinner";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -16,30 +17,39 @@ export default function Login() {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // 로딩 상태 추가
+
   useEffect(() => setMounted(true), []);
   useEffect(() => {
     localStorage.removeItem("accessToken");
   }, []);
+
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
 
+    if (!email.trim()) {
+      setErrorMessage("이메일은 공백일 수 없습니다.");
+      return;
+    } else if (!password.trim()) {
+      setErrorMessage("비밀번호는 공백일 수 없습니다.");
+      return;
+    }
+
+    setIsLoading(true); // 로딩 시작
     try {
-      const res = await api.post("/api/login", {
-        email,
-        password,
-      });
+      const res = await api.post("/login", { email, password });
       localStorage.setItem("accessToken", res.headers["authorization"]);
-      console.log(localStorage.getItem("accessToken"));
       window.location.href = "/";
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        // AxiosError만 처리
         const message =
           error.response?.data?.message || "로그인에 실패했습니다.";
         setErrorMessage(message);
       } else {
         setErrorMessage("알 수 없는 오류가 발생했습니다.");
       }
+    } finally {
+      setIsLoading(false); // 로딩 종료
     }
   };
 
@@ -119,8 +129,13 @@ export default function Login() {
               {errorMessage}
             </div>
           )}
-          <Button onClick={handleSubmit} className="w-full mt-2">
-            로그인
+          <Button
+            onClick={handleSubmit}
+            className="w-full mt-2 flex items-center justify-center gap-2"
+            disabled={isLoading}
+          >
+            {isLoading && <Spinner />}
+            {isLoading ? "로그인 중..." : "로그인"}
           </Button>
         </form>
       </div>

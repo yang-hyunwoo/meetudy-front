@@ -6,19 +6,47 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import Image from "next/image";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import PasswordInput from "@/components/join/PasswordInput";
+import Spinner from "@/components/ui/Spinner";
+import { api } from "@/lib/axios";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 export default function SignupForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [name, setName] = useState("");
-  const [nickname, setNickname] = useState("");
-  const [birthday, setBirthday] = useState("");
-  const [hpNum, setHpNum] = useState("");
+  const router = useRouter();
   const { resolvedTheme } = useTheme();
+  const [isLoading, setIsLoading] = useState(false); // 로딩 상태 추가
+
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const [name, setName] = useState("");
+  const [nameError, setNameError] = useState("");
+
+  const nicknameInputRef = useRef<HTMLInputElement>(null);
+  const [nickname, setNickname] = useState("");
+  const [nicknameError, setNicknameError] = useState("");
+
+  const birthdayInputRef = useRef<HTMLInputElement>(null);
+  const [birthday, setBirthday] = useState("");
+  const [birthdayError, setBirthdayError] = useState("");
+
+  const hpNumInputRef = useRef<HTMLInputElement>(null);
+  const [hpNum, setHpNum] = useState("");
+  const [hpNumError, setHpNumError] = useState("");
+
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+  const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  const passwordConfirmInputRef = useRef<HTMLInputElement>(null);
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [passwordConfirmError, setPasswordConfirmError] = useState("");
+
   const [agreeEmail, setAgreeEmail] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -26,10 +54,247 @@ export default function SignupForm() {
     setMounted(true);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const JoinMemberReqDto = {
+    email: email,
+    name: name,
+    nickName: nickname,
+    birth: birthday,
+    phoneNumber: hpNum,
+    password: password,
+    isEmailAgreed: agreeEmail,
+  };
+  const EMAIL_REGEX = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+  const NAME_REGEX = /^[가-힣a-zA-Z]+$/;
+  const EMAIL_NOT_NULL = "이메일은 공백일 수 없습니다.";
+  const NAME_NOT_NULL = "이름은 공백일 수 없습니다.";
+  const NICKNAME_NOT_NULL = "닉네임은 공백일 수 없습니다.";
+  const BIRTHDAY_NOT_NULL = "생일은 공백일 수 없습니다.";
+  const HPNUM_NOT_NULL = "휴대폰 번호는 공백일 수 없습니다.";
+  const PASSWORD_NOT_NULL = "비밀번호는 공백일 수 없습니다.";
+  /**
+   * 이메일 포커스 유효성 검사
+   */
+  const handleEmailBlur = () => {
+    if (!email.trim()) {
+      setEmailError(EMAIL_NOT_NULL);
+    } else if (!EMAIL_REGEX.test(email)) {
+      setEmailError("이메일 형식이 올바르지 않습니다.");
+    } else {
+      setEmailError("");
+    }
+  };
+
+  /**
+   * 이름 포커스 유효성 검사
+   */
+  const handleNameBlur = () => {
+    if (!name.trim()) {
+      setNameError(NAME_NOT_NULL);
+    } else if (!NAME_REGEX.test(name)) {
+      setNameError("이름은 한글 또는 영문만 입력 가능합니다.");
+    } else if (name.length > 50) {
+      setNameError(
+        "이름은 한글 또는 영문으로 1자 이상 50자 이하로 입력해야 합니다.",
+      );
+    } else {
+      setNameError("");
+    }
+  };
+
+  /**
+   * 닉네임 포커스 유효성 검사
+   */
+  const handleNicknameBlur = () => {
+    if (!nickname.trim()) {
+      setNicknameError(NICKNAME_NOT_NULL);
+    } else if (!NAME_REGEX.test(nickname)) {
+      setNicknameError("닉네임은 한글 또는 영문만 입력 가능합니다.");
+    } else if (nickname.length > 30) {
+      setNicknameError(
+        "닉네임은 한글 또는 영문으로 1자 이상 50자 이하로 입력해야 합니다.",
+      );
+    } else {
+      setNicknameError("");
+    }
+  };
+
+  /**
+   * 생일 포커스 유효성 검사
+   */
+  const handleBirthdayBlur = () => {
+    if (!birthday.trim()) {
+      setBirthdayError(BIRTHDAY_NOT_NULL);
+    } else if (birthday.length != 8) {
+      setBirthdayError("생년월일 형식을 확인 해주세요.");
+    } else {
+      setBirthdayError("");
+    }
+  };
+
+  const isValidPhone = (value: string): boolean => {
+    return /^010/.test(value);
+  };
+
+  /**
+   * 휴대폰 포커스 유효성 검사
+   */
+  const handleHpNumBlur = () => {
+    if (!hpNum.trim()) {
+      setHpNumError(HPNUM_NOT_NULL);
+    } else if (!isValidPhone(hpNum)) {
+      setHpNumError("휴대폰 번호는 010으로 시작해야 합니다.");
+    } else if (hpNum.length != 11) {
+      setHpNumError("휴대폰 번호는 11자리여야 합니다.");
+    } else {
+      setHpNumError("");
+    }
+  };
+
+  const isValidPassword = (password: string): boolean => {
+    const pattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+=-]).{8,20}$/;
+    return pattern.test(password);
+  };
+
+  /**
+   * 비밀번호 포커스 유효성 검사
+   */
+  const handlePasswordBlur = () => {
+    if (!password.trim()) {
+      setPasswordError(PASSWORD_NOT_NULL);
+    } else if (!isValidPassword(password)) {
+      setPasswordError(
+        "비밀번호는 영문, 숫자, 특수문자를 포함한 8~20자여야 합니다.",
+      );
+    } else {
+      if (!passwordConfirm.trim()) {
+        setPasswordError("");
+      } else {
+        if (passwordConfirm != password) {
+          setPasswordError("비밀번호가 일치하지 않습니다.");
+          setPasswordConfirmError("");
+        } else {
+          setPasswordError("");
+          setPasswordConfirmError("");
+        }
+      }
+    }
+  };
+
+  /**
+   * 비밀번호 포커스 유효성 검사
+   */
+  const handlePasswordConfirmBlur = () => {
+    if (!passwordConfirm.trim()) {
+      setPasswordConfirmError(PASSWORD_NOT_NULL);
+    } else if (!isValidPassword(passwordConfirm)) {
+      setPasswordConfirmError(
+        "비밀번호는 영문, 숫자, 특수문자를 포함한 8~20자여야 합니다.",
+      );
+    } else {
+      if (!password.trim()) {
+        setPasswordConfirmError("");
+      } else {
+        if (passwordConfirm != password) {
+          setPasswordError("비밀번호가 일치하지 않습니다.");
+          setPasswordConfirmError("");
+        } else {
+          setPasswordError("");
+          setPasswordConfirmError("");
+        }
+      }
+    }
+  };
+
+  /**
+   * 회원가입 api 호출
+   * @param e
+   * @returns
+   */
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("회원가입:", { name, email, password });
-    // 회원가입 로직
+    const errorList = [
+      emailError,
+      nameError,
+      nicknameError,
+      birthdayError,
+      hpNumError,
+      passwordError,
+      passwordConfirmError,
+    ];
+
+    // 하나라도 에러가 있다면 중단
+    if (errorList.some(Boolean)) {
+      return;
+    }
+
+    // 값 비었는지도 체크
+    const fields = [
+      { name: "email", value: email, message: EMAIL_NOT_NULL },
+      { name: "name", value: name, message: NAME_NOT_NULL },
+      { name: "nickName", value: nickname, message: NICKNAME_NOT_NULL },
+      { name: "birth", value: birthday, message: BIRTHDAY_NOT_NULL },
+      { name: "phonenNumber", value: hpNum, message: HPNUM_NOT_NULL },
+      { name: "password", value: password, message: PASSWORD_NOT_NULL },
+      {
+        name: "passwordConfirm",
+        value: passwordConfirm,
+        message: PASSWORD_NOT_NULL,
+      },
+    ];
+    for (const field of fields) {
+      if (!field.value.trim()) {
+        setErrorByField(`${field.name}`, `${field.message}`);
+        return;
+      }
+    }
+    setIsLoading(true); // 로딩 시작
+    try {
+      const res = await api.post("/join", JoinMemberReqDto);
+      //회원가입 완료 페이지
+      router.push("/join/success");
+    } catch (error) {
+      //에러 검증 실패
+      if (axios.isAxiosError(error)) {
+        if (error.response?.data.httpCode == 409) {
+          //이메일 중복
+          setEmailError(error.response?.data?.message);
+        } else {
+          const field = error.response?.data?.data.field;
+          const message = error.response?.data?.data.message;
+          if (field && message) {
+            setErrorByField(field, message);
+          }
+        }
+      }
+    } finally {
+      setIsLoading(false); // 로딩 종료
+    }
+  };
+
+  const setErrorByField = (field: string, message: string) => {
+    switch (field) {
+      case "email":
+        setEmailError(message);
+        break;
+      case "name":
+        setNameError(message);
+        break;
+      case "nickName":
+        setNicknameError(message);
+        break;
+      case "birth":
+        setBirthdayError(message);
+        break;
+      case "phoneNumber":
+        setHpNumError(message);
+        break;
+      case "password":
+        setPasswordError(message);
+        break;
+      default:
+        alert("오류가 발생했습니다. \n 잠시후 다시 시도해 주세요.");
+        return;
+    }
   };
 
   return (
@@ -60,66 +325,115 @@ export default function SignupForm() {
             <div>
               <Input
                 id="email"
-                type="email"
+                type="text"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onBlur={handleEmailBlur}
                 placeholder="you@example.com"
-                required
+                ref={emailInputRef}
+                onChange={(e) => setEmail(e.target.value)}
               />
+              {emailError && (
+                <p className="text-xs text-red-500 mt-3">{emailError}</p>
+              )}
             </div>
 
             <div>
               <Input
                 id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
                 placeholder="이름"
-                required
+                value={name}
+                onBlur={handleNameBlur}
+                ref={nameInputRef}
+                maxLength={50}
+                onChange={(e) => setName(e.target.value)}
               />
+              {nameError && (
+                <p className="text-xs text-red-500 mt-3">{nameError}</p>
+              )}
             </div>
             <div>
               <Input
                 id="nickname"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
                 placeholder="닉네임"
-                required
+                value={nickname}
+                onBlur={handleNicknameBlur}
+                ref={nicknameInputRef}
+                maxLength={30}
+                onChange={(e) => setNickname(e.target.value)}
               />
+              {nicknameError && (
+                <p className="text-xs text-red-500 mt-3">{nicknameError}</p>
+              )}
             </div>
             <div>
               <Input
                 id="birthday"
+                type="text"
+                placeholder="예: 19990101"
+                inputMode="numeric"
+                pattern="\d{8}"
                 value={birthday}
-                onChange={(e) => setBirthday(e.target.value)}
-                placeholder="생년월일"
-                required
+                onBlur={handleBirthdayBlur}
+                ref={birthdayInputRef}
+                maxLength={8}
+                onChange={(e) => {
+                  const onlyNums = e.target.value.replace(/[^0-9]/g, "");
+                  setBirthday(onlyNums.slice(0, 8));
+                }}
               />
+              {birthdayError && (
+                <p className="text-xs text-red-500 mt-3">{birthdayError}</p>
+              )}
             </div>
             <div>
               <Input
                 id="hpnum"
+                type="text"
+                placeholder="예: 01011112222"
+                pattern="\d{11}"
                 value={hpNum}
-                onChange={(e) => setHpNum(e.target.value)}
-                placeholder="휴대폰번호"
-                required
+                onBlur={handleHpNumBlur}
+                ref={hpNumInputRef}
+                maxLength={11}
+                onChange={(e) => {
+                  const onlyNums = e.target.value.replace(/[^0-9]/g, "");
+                  setHpNum(onlyNums.slice(0, 11));
+                }}
               />
+              {hpNumError && (
+                <p className="text-xs text-red-500 mt-3">{hpNumError}</p>
+              )}
             </div>
 
             {/* 비밀번호 입력 */}
             <PasswordInput
               id="password"
-              value={password}
-              onChange={setPassword}
               placeholder="비밀번호"
+              value={password}
+              onBlur={handlePasswordBlur}
+              ref={passwordInputRef}
+              maxLength={20}
+              onChange={setPassword}
             />
+            {passwordError && (
+              <p className="text-xs text-red-500 mt-3">{passwordError}</p>
+            )}
 
             {/* 비밀번호 확인 입력 */}
             <PasswordInput
               id="passwordconfirm"
-              value={passwordConfirm}
-              onChange={setPasswordConfirm}
               placeholder="비밀번호 확인"
+              value={passwordConfirm}
+              onBlur={handlePasswordConfirmBlur}
+              ref={passwordConfirmInputRef}
+              maxLength={20}
+              onChange={setPasswordConfirm}
             />
+            {passwordConfirmError && (
+              <p className="text-xs text-red-500 mt-3">
+                {passwordConfirmError}
+              </p>
+            )}
 
             {/* ✅ Checkbox 영역 */}
             <div className="flex items-center space-x-2">
@@ -136,8 +450,13 @@ export default function SignupForm() {
               </label>
             </div>
 
-            <Button type="submit" className="w-full">
-              Sign up
+            <Button
+              onClick={handleSubmit}
+              className="w-full "
+              disabled={isLoading}
+            >
+              {isLoading && <Spinner />}
+              {isLoading ? "회원가입 중..." : "회원가입"}
             </Button>
           </form>
         </CardContent>

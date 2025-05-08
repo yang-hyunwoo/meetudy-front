@@ -115,24 +115,26 @@ export default function MobileMenu({
 
       {/* 로그인/로그아웃 + 내정보 (모바일) */}
       <div className="pt-4 border-t space-y-2">
-        <Link
-          href="/mypage"
-          onClick={() => setMenuOpen(false)}
-          className="text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white"
-        >
-          내 정보
-        </Link>
         {isLoggedIn ? (
-          <Button
-            variant="outline"
-            onClick={() => {
-              onLogout?.();
-              setMenuOpen(false);
-            }}
-            className="w-full"
-          >
-            로그아웃
-          </Button>
+          <>
+            <Link
+              href="/mypage"
+              onClick={() => setMenuOpen(false)}
+              className="text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white"
+            >
+              내 정보
+            </Link>
+            <Button
+              variant="outline"
+              onClick={() => {
+                onLogout?.();
+                setMenuOpen(false);
+              }}
+              className="w-full"
+            >
+              로그아웃
+            </Button>
+          </>
         ) : (
           <>
             <Link href="/login" onClick={() => setMenuOpen(false)}>

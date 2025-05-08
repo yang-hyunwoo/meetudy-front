@@ -6,7 +6,7 @@ export function useAuth() {
 
   useEffect(() => {
     api
-      .get("/api/user/me")
+      .get("/user/me")
       .then(() => setIsLoggedIn(true))
       .catch(() => setIsLoggedIn(false));
   }, []);
