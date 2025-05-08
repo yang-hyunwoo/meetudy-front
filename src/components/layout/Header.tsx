@@ -101,24 +101,23 @@ export default function Header({ isLoggedIn, onLogout }: HeaderProps) {
 
         {/* 로그인/로그아웃 + 다크모드 + 햄버거 */}
         <div className="flex items-center space-x-6">
-          <NotificationDropdown />
-          {/* 내 정보 */}
-          <Link
-            href="/mypage"
-            className="hidden md:block text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors text-sm"
-          >
-            내 정보
-          </Link>
-
-          {/* 로그인/로그아웃 */}
           {isLoggedIn ? (
-            <Button
-              variant="outline"
-              onClick={onLogout}
-              className="hidden md:block"
-            >
-              로그아웃
-            </Button>
+            <>
+              <NotificationDropdown />
+              <Link
+                href="/mypage"
+                className="hidden md:block text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors text-sm"
+              >
+                내 정보
+              </Link>
+              <Button
+                variant="outline"
+                onClick={onLogout}
+                className="hidden md:block"
+              >
+                로그아웃
+              </Button>
+            </>
           ) : (
             <div className="hidden md:flex flex-col items-end space-y-1">
               <Link href="/login">
@@ -132,12 +131,6 @@ export default function Header({ isLoggedIn, onLogout }: HeaderProps) {
               >
                 회원가입 →
               </Link>
-              {/* <Link
-                href="/password/change"
-                className="text-xs text-blue-500 hover:underline dark:text-blue-400"
-              >
-                비밀번호 변경 페이지
-              </Link> */}
             </div>
           )}
 

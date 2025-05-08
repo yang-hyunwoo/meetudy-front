@@ -2,10 +2,9 @@ import axios from "axios";
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  withCredentials: true, // ✅ 쿠키 자동 포함 (refreshToken 용)
+  withCredentials: true, //  쿠키 자동 포함 (refreshToken 용)
 });
 
-// ✅ 여기에 Request Interceptor 추가
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
   if (token) {
@@ -14,7 +13,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// ✅ 기존의 Response Interceptor는 그대로 둬도 OK
 api.interceptors.response.use(
   (response) => {
     const newToken = response.headers["authorization"];
