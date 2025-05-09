@@ -5,10 +5,16 @@ export function useAuth() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    api
-      .get("/user/me")
-      .then(() => setIsLoggedIn(true))
-      .catch(() => setIsLoggedIn(false));
+    const token = localStorage.getItem("accessToken");
+
+    if (token) {
+      api
+        .get("/user/me")
+        .then(() => setIsLoggedIn(true))
+        .catch(() => setIsLoggedIn(false));
+    } else {
+      setIsLoggedIn(false);
+    }
   }, []);
 
   return { isLoggedIn };

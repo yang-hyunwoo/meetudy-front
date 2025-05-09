@@ -38,8 +38,6 @@ vs code settings.json
 
 ```
 
-
-
 ```
 typeScript : Yes
 ESLint : Yes

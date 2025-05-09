@@ -21,14 +21,23 @@ export default function CustomPagination({
   onPageChange,
 }: CustomPaginationProps) {
   const getPages = () => {
+    const visiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(visiblePages / 2));
+    let endPage = startPage + visiblePages - 1;
+
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - visiblePages + 1);
+    }
+
     const pages = [];
-    for (let i = 1; i <= totalPages; i++) {
+    for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
     return pages;
   };
 
-  return (
+  return totalPages > 0 ? (
     <Pagination>
       <PaginationContent>
         <PaginationItem>
@@ -56,5 +65,5 @@ export default function CustomPagination({
         </PaginationItem>
       </PaginationContent>
     </Pagination>
-  );
+  ) : null;
 }

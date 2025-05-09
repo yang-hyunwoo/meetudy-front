@@ -26,6 +26,7 @@ export default function BoardForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log(content);
     e.preventDefault();
 
     if (title.trim() === "" || content.trim() === "") {
@@ -52,7 +53,7 @@ export default function BoardForm({
           ? "게시글이 작성되었습니다!"
           : "게시글이 수정되었습니다!",
       );
-      router.push("/study/board");
+      //router.push("/study/board");
     } catch (error) {
       console.error(error);
       alert("오류가 발생했습니다.");
@@ -73,7 +74,6 @@ export default function BoardForm({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           disabled={isSubmitting}
-          required
         />
 
         <TiptapEditor content={content} onChange={(html) => setContent(html)} />
