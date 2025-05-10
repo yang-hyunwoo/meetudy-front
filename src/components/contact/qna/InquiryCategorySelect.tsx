@@ -9,8 +9,8 @@ import {
 } from "@/components/ui/select";
 
 interface InquiryCategorySelectProps {
-  value: string;
-  onChange: (value: string) => void;
+  value: string | null;
+  onChange: (value: string | null) => void;
 }
 
 export default function InquiryCategorySelect({
@@ -18,14 +18,19 @@ export default function InquiryCategorySelect({
   onChange,
 }: InquiryCategorySelectProps) {
   return (
-    <Select value={value} onValueChange={onChange}>
+    <Select
+      key={value ?? "default"}
+      value={value === null ? undefined : value} // ✅ 핵심
+      onValueChange={(val: string) => onChange(val === "" ? null : val)}
+    >
       <SelectTrigger className="w-full">
         <SelectValue placeholder="문의 유형을 선택해주세요" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="관리">관리</SelectItem>
-        <SelectItem value="스터디">스터디</SelectItem>
-        <SelectItem value="계정">계정</SelectItem>
+        <SelectItem value="ATTENDANCE">출석</SelectItem>
+        <SelectItem value="ASSIGNMENT">과제</SelectItem>
+        <SelectItem value="ACCOUNT">계정</SelectItem>
+        <SelectItem value="SERVICE">서비스</SelectItem>
       </SelectContent>
     </Select>
   );

@@ -1,0 +1,25 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "workbench.iconTheme": "material-icon-theme",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ],
+  "files.eol": "\n",
+  "prettier.endOfLine": "auto",
+  "prettier.singleQuote": false,
+  "prettier.semi": true,
+  "prettier.useTabs": false,
+  "prettier.tabWidth": 2,
+  "prettier.trailingComma": "all",
+  "prettier.printWidth": 80,
+  "prettier.bracketSpacing": true,
+  "prettier.arrowParens": "always",
+  "explorer.confirmDragAndDrop": false,
+  "typescript.updateImportsOnFileMove.enabled": "always"
+}
