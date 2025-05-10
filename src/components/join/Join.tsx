@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation";
 export default function SignupForm() {
   const router = useRouter();
   const { resolvedTheme } = useTheme();
-  const [isLoading, setIsLoading] = useState(false); // 로딩 상태 추가
+  const [isLoading, setIsLoading] = useState(false);
 
   const emailInputRef = useRef<HTMLInputElement>(null);
   const [email, setEmail] = useState("");

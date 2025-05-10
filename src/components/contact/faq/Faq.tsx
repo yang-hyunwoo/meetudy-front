@@ -105,7 +105,7 @@ export default function Faq() {
             을 이용해보세요.
           </p>
           <a
-            href="/qna"
+            href="/contact/qna"
             className="inline-block text-sm font-medium px-4 py-2 rounded transition
                     text-white 
                     bg-gray-800 hover:bg-gray-900
