@@ -86,7 +86,7 @@ export default function GroupList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const { resolvedTheme } = useTheme(); // ✅ 현재 테마 확인
+  const { resolvedTheme } = useTheme(); //  현재 테마 확인
   const [mounted, setMounted] = useState(false);
 
   const [isOtpOpen, setIsOtpOpen] = useState(false);
@@ -153,7 +153,7 @@ export default function GroupList() {
         onSearch={handleSearch}
         onEnter={handleKeyDown}
       />
-      {/* ✅ 제목 + 그룹 만들기 버튼 영역 */}
+      {/*  제목 + 그룹 만들기 버튼 영역 */}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-3xl font-bold">스터디 그룹</h1>
         {mounted && (
@@ -187,7 +187,7 @@ export default function GroupList() {
           />
         ))}
       </ul>
-      {/* ✅ OTP 모달은 루트 영역에 */}
+      {/*  OTP 모달은 루트 영역에 */}
       <OtpModal
         isOpen={isOtpOpen}
         onClose={() => setIsOtpOpen(false)}

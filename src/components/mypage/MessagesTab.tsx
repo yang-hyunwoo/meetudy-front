@@ -118,7 +118,7 @@ export default function MessagesTab() {
               {selected.body}
             </p>
 
-            {/* ✅ 답장 입력창 */}
+            {/* 답장 입력창 */}
             <textarea
               className="w-full h-32 p-2 border rounded bg-gray-50 dark:bg-gray-700 dark:text-white resize-none"
               placeholder="답장 내용을 입력하세요..."
@@ -126,7 +126,7 @@ export default function MessagesTab() {
               onChange={(e) => setReplyContent(e.target.value)}
             />
 
-            {/* ✅ 답장 보내기 버튼 */}
+            {/* 답장 보내기 버튼 */}
             <button
               onClick={sendReply}
               disabled={isSending}

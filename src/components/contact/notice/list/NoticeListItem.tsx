@@ -1,19 +1,19 @@
 "use client";
 
 import Link from "next/link";
-
+import { NOTICE_TYPE_DISPLAY_MAP } from "@/enum/contactEnum";
 interface NoticeListItemProps {
   id: string;
   title: string;
+  noticeType: string;
   createdAt: string;
-  category?: string;
 }
 
 export default function NoticeListItem({
   id,
   title,
+  noticeType,
   createdAt,
-  category,
 }: NoticeListItemProps) {
   return (
     <li>
@@ -29,11 +29,10 @@ export default function NoticeListItem({
             {createdAt}
           </span>
         </div>
-
-        {category && (
+        {noticeType && (
           <div className="mt-1 flex justify-end">
             <span className="inline-block text-[13px] font-medium px-3 py-1 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-              {category}
+              {NOTICE_TYPE_DISPLAY_MAP[noticeType] ?? noticeType}
             </span>
           </div>
         )}

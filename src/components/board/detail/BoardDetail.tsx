@@ -32,7 +32,7 @@ interface BoardDetailProps {
 export default function BoardDetail({ post }: BoardDetailProps) {
   const router = useRouter();
 
-  // ✅ 댓글 상태 추가
+  // 댓글 상태 추가
   const [comments, setComments] = useState<Comment[]>([
     {
       id: "1",

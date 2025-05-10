@@ -1,6 +1,6 @@
 import BoardList from "@/components/board/list/BoardList";
 
-// ✅ 추후 API 호출로 교체할 예정 (지금은 mock 데이터)
+//  추후 API 호출로 교체할 예정 (지금은 mock 데이터)
 const mockPosts = [
   {
     id: "1",

@@ -23,7 +23,7 @@ interface JoinedGroupListProps {
   groups: JoinedGroup[];
 }
 
-// ✅ 그룹별 출석률 + 출석시간 Mock 데이터
+//  그룹별 출석률 + 출석시간 Mock 데이터
 const groupAttendanceMock: Record<string, { rate: number; times: string[] }> = {
   g1: {
     rate: 82,
@@ -90,7 +90,7 @@ export default function JoinedGroupList({ groups }: JoinedGroupListProps) {
     <div className="space-y-6">
       {groups.map((group) => (
         <div key={group.id} className="relative">
-          {/* ✅ 그룹 카드 클릭: 출석률 다이얼로그 */}
+          {/*  그룹 카드 클릭: 출석률 다이얼로그 */}
 
           {/* 그룹 카드 */}
           <JoinedGroupCard
@@ -99,7 +99,7 @@ export default function JoinedGroupList({ groups }: JoinedGroupListProps) {
             thumbnail={group.thumbnail}
             memberCount={group.memberCount}
             description={group.description}
-            onClick={() => setOpenAttendanceGroupId(group.id)} // ✅ 그룹 카드 클릭 시 출석률 다이얼로그 열기
+            onClick={() => setOpenAttendanceGroupId(group.id)} //  그룹 카드 클릭 시 출석률 다이얼로그 열기
             onClickMembers={() => setOpenMembersGroupId(group.id)}
             onClickWithdraw={() => console.log(`${group.name} 탈퇴하기 클릭됨`)}
           />

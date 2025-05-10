@@ -35,7 +35,7 @@ export default function UserListSidebar({
 }: UserListSidebarProps) {
   return (
     <>
-      {/* ✅ 모바일 토글 버튼 */}
+      {/*  모바일 토글 버튼 */}
       {!showSidebar && (
         <Button
           className="md:hidden absolute top-2 left-2 z-20"
@@ -47,7 +47,7 @@ export default function UserListSidebar({
         </Button>
       )}
 
-      {/* ✅ 모바일 사이드바 오버레이 */}
+      {/*  모바일 사이드바 오버레이 */}
       {showSidebar && (
         <div
           className="fixed inset-0 bg-black/50 z-10 md:hidden"
@@ -55,7 +55,7 @@ export default function UserListSidebar({
         />
       )}
 
-      {/* ✅ 실제 사용자 목록 사이드바 */}
+      {/*  실제 사용자 목록 사이드바 */}
       <aside
         className={`
         fixed md:static top-0 left-0 h-full md:h-auto w-64 bg-muted border-r p-4

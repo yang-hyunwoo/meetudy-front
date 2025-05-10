@@ -11,7 +11,7 @@ interface JoinedGroupCardProps {
   description: string;
   onClickMembers: () => void;
   onClickWithdraw: () => void;
-  onClick?: () => void; // ✅ 추가
+  onClick?: () => void; //
 }
 export default function JoinedGroupCard({
   id,
@@ -25,7 +25,7 @@ export default function JoinedGroupCard({
 }: JoinedGroupCardProps) {
   return (
     <div
-      onClick={onClick} // ✅ 여기에 추가
+      onClick={onClick} //
       className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 p-4 rounded-xl bg-white dark:bg-zinc-900 shadow cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800 transition"
     >
       {/* 썸네일 */}

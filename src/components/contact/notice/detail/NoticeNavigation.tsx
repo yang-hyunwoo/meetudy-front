@@ -4,22 +4,22 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, List } from "lucide-react";
 
 interface NoticeNavigationProps {
-  prevNotice?: { id: string };
-  nextNotice?: { id: string };
+  prevId?: string;
+  nextId?: string;
 }
 
 export default function NoticeNavigation({
-  prevNotice,
-  nextNotice,
+  prevId,
+  nextId,
 }: NoticeNavigationProps) {
   return (
     <div className="mt-12 border-t border-gray-200 dark:border-gray-700 pt-6">
       <div className="grid grid-cols-3 gap-4">
         {/* 이전 글 */}
         <div className="flex justify-start">
-          {prevNotice && (
+          {prevId && (
             <Link
-              href={`/contact/notice/${prevNotice.id}`}
+              href={`/contact/notice/${prevId}`}
               className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium 
                         bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 
                         text-sm text-gray-700 dark:text-gray-200 transition"
@@ -45,9 +45,9 @@ export default function NoticeNavigation({
 
         {/* 다음 글 */}
         <div className="flex justify-end">
-          {nextNotice && (
+          {nextId && (
             <Link
-              href={`/contact/notice/${nextNotice.id}`}
+              href={`/contact/notice/${nextId}`}
               className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium 
                         bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 
                         text-sm text-gray-700 dark:text-gray-200 transition"

@@ -73,7 +73,7 @@ export default function MyPage() {
           phone: profile.phone,
           avatarUrl: profile.avatarUrl,
         }}
-        onSave={handleSave} // ✅ 이렇게!
+        onSave={handleSave}
       />
 
       {/* 활동 요약 카드 */}

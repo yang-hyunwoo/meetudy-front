@@ -20,7 +20,7 @@ export default function InquiryCategorySelect({
   return (
     <Select
       key={value ?? "default"}
-      value={value === null ? undefined : value} // ✅ 핵심
+      value={value === null ? undefined : value}
       onValueChange={(val: string) => onChange(val === "" ? null : val)}
     >
       <SelectTrigger className="w-full">

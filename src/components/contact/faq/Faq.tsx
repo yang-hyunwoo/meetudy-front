@@ -133,13 +133,15 @@ export default function Faq() {
       </Accordion>
 
       {/* 페이징 */}
-      <div className="mt-8 flex justify-center">
-        <CustomPagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
-      </div>
+      {totalPages > 1 && (
+        <div className="mt-8 flex justify-center">
+          <CustomPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      )}
     </div>
   );
 }

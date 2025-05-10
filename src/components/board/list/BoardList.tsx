@@ -48,7 +48,7 @@ export default function BoardList({ posts, isLoggedIn }: BoardListProps) {
       {/* 상단: 자유게시판 제목 */}
       <h1 className="text-2xl font-bold">자유게시판</h1>
 
-      {/* ✅ 검색창 */}
+      {/*  검색창 */}
       <div className="flex gap-2 mb-4">
         <FaqSearchBar
           searchInput={searchInput}
@@ -86,7 +86,7 @@ export default function BoardList({ posts, isLoggedIn }: BoardListProps) {
         )}
       </div>
 
-      {/* ✅ Pagination */}
+      {/*  Pagination */}
       {totalPages > 1 && (
         <div className="flex justify-center mt-6">
           <CustomPagination
@@ -97,7 +97,7 @@ export default function BoardList({ posts, isLoggedIn }: BoardListProps) {
         </div>
       )}
 
-      {/* ✅ 글쓰기 버튼 (맨 아래로 이동) */}
+      {/*  글쓰기 버튼 (맨 아래로 이동) */}
       {isLoggedIn && (
         <div className="flex justify-end mt-6">
           <Link href="/board/write">

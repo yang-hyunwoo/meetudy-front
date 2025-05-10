@@ -104,7 +104,7 @@ export default function GroupCreatePage({
     defaultValues?.endDate,
   );
 
-  // ✅ 태그 추가
+  // 태그 추가
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
 
@@ -133,7 +133,7 @@ export default function GroupCreatePage({
       activeHour,
       activeMinute,
       thumbnail,
-      tags, // ✅ 추가
+      tags,
     };
     if (onSubmit) return onSubmit(values);
     console.log(values);
@@ -196,7 +196,7 @@ export default function GroupCreatePage({
           onChange={(e) => setDescription(e.target.value)}
           required
         />
-        {/* ✅ 태그 입력 */}
+        {/*  태그 입력 */}
         <div>
           <label className="block mb-2 text-sm font-semibold text-gray-800 dark:text-gray-100">
             태그 추가

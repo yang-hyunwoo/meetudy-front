@@ -151,9 +151,9 @@ export default function JoinedGroupOperating({
     if (selectedGroupId === groupId) {
       setSelectedGroupId(null);
       setMembers([]);
-      setSelectedMemberId(null); // ✅ 추가
-      setAttendanceRate(0); // ✅ 추가
-      setAttendanceDates([]); // ✅ 추가
+      setSelectedMemberId(null);
+      setAttendanceRate(0);
+      setAttendanceDates([]);
       return;
     }
 
@@ -161,9 +161,9 @@ export default function JoinedGroupOperating({
     setLoading(true);
 
     // 그룹 변경할 때 이전 멤버 선택 상태 초기화
-    setSelectedMemberId(null); // ✅ 추가
-    setAttendanceRate(0); // ✅ 추가
-    setAttendanceDates([]); // ✅ 추가
+    setSelectedMemberId(null);
+    setAttendanceRate(0);
+    setAttendanceDates([]);
 
     try {
       setMembers([
@@ -206,7 +206,7 @@ export default function JoinedGroupOperating({
             name={group.name}
             thumbnail={group.thumbnail}
             memberCount={group.memberCount}
-            isClosed={groupStatuses[group.id] ?? group.isClosed} // ✅ groupStatuses 먼저 보고, 없으면 group.isClosed
+            isClosed={groupStatuses[group.id] ?? group.isClosed} //  groupStatuses 먼저 보고, 없으면 group.isClosed
             onClick={() => handleCardClick(group.id)}
             onEdit={() => {
               alert("수정");

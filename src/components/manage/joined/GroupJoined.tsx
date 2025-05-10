@@ -9,8 +9,8 @@ import GroupList from "./GroupList";
 import JoinedGroupList from "./JoinedGroupList";
 import CalendarStyle from "./CalendarStyle";
 import { useMemo } from "react";
-import RequestedGroupList from "./RequestedGroupList"; // ✅ 추가
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"; // ✅ 탭 관련 추가
+import RequestedGroupList from "./RequestedGroupList";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 interface GroupEvent {
   groupId: string;
@@ -114,7 +114,7 @@ export default function GroupCalendarPage() {
           <TabsTrigger value="calendar">참여 중인 일정</TabsTrigger>
           <TabsTrigger value="groups">참여 중인 그룹 목록</TabsTrigger>
           <TabsTrigger value="requests">승인 요청 그룹 목록</TabsTrigger>{" "}
-          {/* ✅ 추가 */}
+          {/*  추가 */}
         </TabsList>
 
         {/* 참여 중인 일정 탭 */}
