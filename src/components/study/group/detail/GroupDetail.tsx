@@ -41,7 +41,7 @@ export default function GroupDetail() {
     current: number;
     max: number;
     isPrivate: boolean;
-    joinType: "free" | "approval"; // ✅ 여기 중요!
+    joinType: "free" | "approval";
     isJoined: "none" | "joined" | "requested";
     commentType: boolean;
   }>({
@@ -113,7 +113,7 @@ export default function GroupDetail() {
           console.log("요청 취소 처리");
         }}
       />
-      {/* ✅ OTP 모달은 루트 영역에 */}
+      {/*  OTP 모달은 루트 영역에 */}
       <OtpModal
         isOpen={isOtpOpen}
         onClose={() => setIsOtpOpen(false)}

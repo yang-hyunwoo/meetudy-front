@@ -36,7 +36,7 @@ export default function CalendarStyle() {
         color: white;
       }
       .fc-daygrid-event {
-        background-color: #3b82f6; /* ✅ 파란색 배경 */
+        background-color: #3b82f6; /*  파란색 배경 */
         color: white;
         padding: 2px 4px;
         border-radius: 6px;

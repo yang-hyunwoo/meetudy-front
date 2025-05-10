@@ -8,11 +8,11 @@ interface OperatingGroupCardProps {
   name: string;
   thumbnail: string;
   memberCount: number;
-  isClosed: boolean; // ✅ 모집 종료 여부
+  isClosed: boolean; //  모집 종료 여부
   onClick: () => void;
   onEdit: () => void;
   onDelete: () => void;
-  onToggleClose: () => void; // ✅ 모집 종료/재개 토글 함수
+  onToggleClose: () => void; //  모집 종료/재개 토글 함수
 }
 
 export default function OperatingGroupCard({

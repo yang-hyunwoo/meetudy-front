@@ -25,9 +25,9 @@ export default function InquiryList() {
   useEffect(() => {
     const fetchInquiries = async () => {
       try {
-        const res = await api.get("/private/qna/list"); // ✅ 원하는 Spring API 주소로 변경
+        const res = await api.get("/private/contact/qna/list");
         const data = res.data.data;
-        const formattedData = data.map((item: any) => ({
+        const formattedData = data.content.map((item: any) => ({
           ...item,
           status: item.answerAt ? "답변완료" : "답변대기",
           createdAt: dayjs(item.createdAt).format("YYYY-MM-DD"),

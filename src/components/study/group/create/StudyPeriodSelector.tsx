@@ -8,7 +8,7 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils"; // ✅ 필요하면 className 병합용 (shadcn 기본)
+import { cn } from "@/lib/utils";
 
 interface StudyPeriodSelectorProps {
   startDate?: Date;

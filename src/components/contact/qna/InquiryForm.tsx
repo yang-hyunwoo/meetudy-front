@@ -67,7 +67,7 @@ export default function InquiryForm() {
     setIsLoading(true);
 
     try {
-      const res = await api.post("/private/qna/insert", QnaWriteReqDto);
+      const res = await api.post("/private/contact/qna/insert", QnaWriteReqDto);
       if (res.data.httpCode === 201) {
         alert(res.data.message);
         setQnaType(null);

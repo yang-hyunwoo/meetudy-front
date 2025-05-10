@@ -135,7 +135,7 @@ export default function GroupRoomLayout() {
   return (
     <TooltipProvider>
       <div className="flex flex-col md:flex-row h-[calc(100vh-4rem)] border rounded-lg overflow-hidden relative">
-        {/* ✅ 사용자 목록 사이드바 */}
+        {/*  사용자 목록 사이드바 */}
         <UserListSidebar
           users={mockUsers}
           showSidebar={showSidebar}
@@ -146,7 +146,7 @@ export default function GroupRoomLayout() {
           }}
         />
 
-        {/* ✅ 메인 채팅 영역 */}
+        {/*  메인 채팅 영역 */}
         <main className="flex-1 w-full flex flex-col bg-white dark:bg-zinc-950">
           <Tabs defaultValue="chat" className="flex-1 flex flex-col">
             <TabsContent value="chat" className="flex-1 p-4 overflow-y-auto">
@@ -156,7 +156,7 @@ export default function GroupRoomLayout() {
             </TabsContent>
           </Tabs>
 
-          {/* ✅ 채팅 입력창 */}
+          {/*  채팅 입력창 */}
           <div className="flex items-center gap-2 p-3 border-t bg-white dark:bg-zinc-900">
             <input
               type="text"
@@ -167,7 +167,7 @@ export default function GroupRoomLayout() {
           </div>
         </main>
 
-        {/* ✅ PC 전용 사이드 탭 */}
+        {/* PC 전용 사이드 탭 */}
         <aside className="hidden md:flex flex-col w-80 border-l bg-muted p-4 text-sm">
           <div className="grid grid-cols-2 gap-2 mb-4">
             {["notice", "files", "links", "late"].map((tab) => (
@@ -220,7 +220,7 @@ export default function GroupRoomLayout() {
           </div>
         </aside>
 
-        {/* ✅ 모바일 하단 탭 바 */}
+        {/*  모바일 하단 탭 바 */}
         <div className="fixed bottom-0 left-0 w-full md:hidden flex bg-white dark:bg-zinc-900 border-t">
           {["notice", "files", "links", "late"].map((tab) => (
             <Button
@@ -240,7 +240,7 @@ export default function GroupRoomLayout() {
           ))}
         </div>
 
-        {/* ✅ 모바일 탭 모달 */}
+        {/*  모바일 탭 모달 */}
         <MobileTabModal
           open={mobileTabOpen}
           onOpenChange={setMobileTabOpen}
@@ -290,7 +290,7 @@ export default function GroupRoomLayout() {
           )}
         </MobileTabModal>
 
-        {/* ✅ DM 모달 */}
+        {/*  DM 모달 */}
         <DMModal
           open={dmModalOpen}
           onOpenChange={setDmModalOpen}

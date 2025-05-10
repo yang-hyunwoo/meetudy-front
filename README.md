@@ -23,7 +23,7 @@ vs code settings.json
     }
   ],
   "files.eol": "\n",
-  // ✅ Prettier 옵션 명시적으로 추가
+  // Prettier 옵션 명시적으로 추가
   "prettier.singleQuote": false,
   "prettier.semi": true,
   "prettier.useTabs": false,

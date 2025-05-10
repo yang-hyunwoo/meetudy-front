@@ -40,7 +40,7 @@ export default function BoardForm({
       if (mode === "create") {
         // 작성
         // await api.post("/board", { title, content });
-        console.log("✅ 작성", { title, content });
+        console.log(" 작성", { title, content });
       } else {
         // 수정
         if (!postId) throw new Error("Post ID가 없습니다.");

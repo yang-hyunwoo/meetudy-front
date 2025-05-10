@@ -6,7 +6,8 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion";
 import clsx from "clsx";
-import { QNA_TYPE_DISPLAY_MAP } from "@/enum/inquiryTypeEnum";
+import { QNA_TYPE_DISPLAY_MAP } from "@/enum/contactEnum";
+
 interface InquiryListItemProps {
   id: string;
   questionTitle: string;
@@ -40,7 +41,7 @@ export default function InquiryListItem({
             </p>
           </div>
 
-          {/* ✅ 상태 배지 + 답변일 (모바일 개선) */}
+          {/*  상태 배지 + 답변일 (모바일 개선) */}
           <div className="mt-2 sm:mt-0 flex flex-row justify-end items-center gap-2">
             {status === "답변완료" && answerAt && (
               <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
@@ -61,7 +62,7 @@ export default function InquiryListItem({
         </div>
       </AccordionTrigger>
 
-      {/* ✅ 문의 내용 + 답변 내용 */}
+      {/*  문의 내용 + 답변 내용 */}
       <AccordionContent className="whitespace-pre-line text-sm text-gray-700 dark:text-gray-300">
         {questionContent}
 

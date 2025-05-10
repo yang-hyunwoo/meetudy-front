@@ -27,7 +27,7 @@ export default function ProfileCard({ profile, onSave }: ProfileCardProps) {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      setPreviewUrl(URL.createObjectURL(file)); // ✅ 여기서 미리 URL 저장
+      setPreviewUrl(URL.createObjectURL(file)); //  여기서 미리 URL 저장
     }
   };
   const handleSave = () => {

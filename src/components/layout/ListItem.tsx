@@ -8,7 +8,7 @@ export default function ListItem({
 }: {
   title: string;
   href: string;
-  children?: React.ReactNode; // ✅ 선택형으로 변경
+  children?: React.ReactNode; //  선택형으로 변경
 }) {
   return (
     <li>
