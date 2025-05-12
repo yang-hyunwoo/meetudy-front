@@ -5,43 +5,84 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import CustomPagination from "@/components/common/pagination/Pagination";
 import FaqSearchBar from "@/components/common/search/SearchBar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { api } from "@/lib/axios";
+import { useEffect } from "react";
+import dayjs from "dayjs";
 
-interface Post {
+interface FreePageReqDto {
   id: string;
   title: string;
   author: string;
   createdAt: string;
 }
 
-interface BoardListProps {
-  posts: Post[];
-  isLoggedIn: boolean;
+interface FreePageResDto {
+  id: number;
+  title: string;
+  noticeType: string;
+  writeNickname: string;
+  createdAt: string;
 }
 
 const ITEMS_PER_PAGE = 10;
 
-export default function BoardList({ posts, isLoggedIn }: BoardListProps) {
+export default function BoardList() {
   const [currentPage, setCurrentPage] = useState(1);
+  const [freeList, setFreeList] = useState<FreePageResDto[]>([]);
+  const [totalPages, setTotalPages] = useState(0);
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchType, setSearchType] = useState<"ALL" | "TITLE" | "NICKNAME">(
+    "ALL",
+  );
 
-  const handleSearch = () => {
-    setSearchTerm(searchInput.trim());
-    setCurrentPage(1);
+  useEffect(() => {
+    fetchNotice();
+  }, [currentPage]);
+
+  const fetchNotice = async () => {
+    try {
+      const params: any = {
+        page: currentPage - 1,
+        size: ITEMS_PER_PAGE,
+        searchType: searchType,
+        searchKeyword: searchInput,
+      };
+
+      const res = await api.get("/board/list", { params });
+
+      if (res.data.httpCode === 200) {
+        setTotalPages(res.data.data.totalPages);
+        const data = res.data.data;
+        const formattedData = data.content.map((item: any) => ({
+          ...item,
+          createdAt: dayjs(item.createdAt).format("YYYY-MM-DD"),
+        }));
+        setFreeList(formattedData);
+      }
+    } catch (error) {
+      console.error("공지사항 로딩 실패", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const filteredPosts = posts.filter(
-    (post) =>
-      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.author.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const handleSearch = () => {
+    setCurrentPage(1);
+    fetchNotice();
+  };
 
-  const totalPages = Math.ceil(filteredPosts.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentPosts = filteredPosts.slice(
-    startIndex,
-    startIndex + ITEMS_PER_PAGE,
-  );
+  if (isLoading) {
+    return <div className="text-center py-6">로딩 중...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -49,7 +90,23 @@ export default function BoardList({ posts, isLoggedIn }: BoardListProps) {
       <h1 className="text-2xl font-bold">자유게시판</h1>
 
       {/*  검색창 */}
-      <div className="flex gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-4">
+        <Select
+          value={searchType}
+          onValueChange={(value) =>
+            setSearchType(value as "ALL" | "TITLE" | "NICKNAME")
+          }
+        >
+          <SelectTrigger className="w-[120px] h-9">
+            <SelectValue placeholder="검색 기준" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">전체</SelectItem>
+            <SelectItem value="TITLE">제목</SelectItem>
+            <SelectItem value="NICKNAME">작성자</SelectItem>
+          </SelectContent>
+        </Select>
+
         <FaqSearchBar
           searchInput={searchInput}
           setSearchInput={setSearchInput}
@@ -67,15 +124,15 @@ export default function BoardList({ posts, isLoggedIn }: BoardListProps) {
         </div>
 
         {/* 게시글 리스트 */}
-        {currentPosts.length > 0 ? (
-          currentPosts.map((post) => (
+        {freeList.length > 0 ? (
+          freeList.map((post) => (
             <Link
               key={post.id}
               href={`/board/detail/${post.id}`}
               className="grid grid-cols-12 items-center border-t py-3 px-4 hover:bg-muted transition text-sm"
             >
               <div className="col-span-8 truncate">{post.title}</div>
-              <div className="col-span-2 text-center">{post.author}</div>
+              <div className="col-span-2 text-center">{post.writeNickname}</div>
               <div className="col-span-2 text-center">{post.createdAt}</div>
             </Link>
           ))
@@ -98,13 +155,13 @@ export default function BoardList({ posts, isLoggedIn }: BoardListProps) {
       )}
 
       {/*  글쓰기 버튼 (맨 아래로 이동) */}
-      {isLoggedIn && (
+      {/* {isLoggedIn && (
         <div className="flex justify-end mt-6">
           <Link href="/board/write">
             <Button size="sm">글쓰기</Button>
           </Link>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

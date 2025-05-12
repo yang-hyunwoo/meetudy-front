@@ -5,6 +5,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { api } from "@/lib/axios";
+import axios from "axios";
 
 interface ProfileCardProps {
   profile: {
@@ -23,11 +25,17 @@ export default function ProfileCard({ profile, onSave }: ProfileCardProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file)); //  여기서 미리 URL 저장
+
+      const formData = new FormData();
+      formData.append("files", file);
+
+      const res = await api.post("/private/file-upload", formData);
+      console.log(res);
     }
   };
   const handleSave = () => {

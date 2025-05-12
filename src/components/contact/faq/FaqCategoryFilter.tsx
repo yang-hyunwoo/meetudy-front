@@ -14,7 +14,7 @@ export default function FaqCategoryFilter({
   onCategorySelect,
 }: FaqCategoryFilterProps) {
   return (
-    <div className="flex justify-center flex-wrap gap-2 mb-6">
+    <div className="flex justify-center flex-wrap gap-2 mb-6 mt-6">
       {categories.map((cat) => (
         <button
           key={cat}

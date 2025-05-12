@@ -10,6 +10,7 @@ import SocialLoginButtons from "@/components/login/SocialLoginButtons";
 import { api } from "@/lib/axios";
 import axios from "axios";
 import Spinner from "@/components/ui/Spinner";
+import { useSearchParams } from "next/navigation";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -18,7 +19,8 @@ export default function Login() {
   const [mounted, setMounted] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false); // 로딩 상태 추가
-
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo") || "/";
   useEffect(() => setMounted(true), []);
   useEffect(() => {
     localStorage.removeItem("accessToken");
@@ -39,7 +41,7 @@ export default function Login() {
     try {
       const res = await api.post("/login", { email, password });
       localStorage.setItem("accessToken", res.headers["authorization"]);
-      window.location.href = "/";
+      window.location.href = redirectTo;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const message =

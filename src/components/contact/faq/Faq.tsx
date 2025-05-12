@@ -35,6 +35,7 @@ export default function Faq() {
   const [searchInput, setSearchInput] = useState("");
   const [totalPages, setTotalPages] = useState(0);
   const [faqs, setFaqs] = useState<FaqItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const CATEGORY_MAP: Record<string, string> = {
     전체: "ALL",
     출석: "ATTENDANCE",
@@ -68,6 +69,8 @@ export default function Faq() {
       }
     } catch (error) {
       console.error("FAQ 로딩 실패", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -75,6 +78,10 @@ export default function Faq() {
     setCurrentPage(1);
     fetchFaqs();
   };
+
+  if (isLoading) {
+    return <div className="text-center py-6">로딩 중...</div>;
+  }
 
   return (
     <div className="max-w-2xl mx-auto py-16 px-4">

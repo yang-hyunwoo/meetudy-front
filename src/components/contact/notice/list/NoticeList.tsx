@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import dayjs from "dayjs";
 
 interface NoticePageResDto {
-  id: string;
+  id: number;
   title: string;
   noticeType: string;
   createdAt: string;

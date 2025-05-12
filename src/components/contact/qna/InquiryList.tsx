@@ -26,8 +26,8 @@ export default function InquiryList() {
     const fetchInquiries = async () => {
       try {
         const res = await api.get("/private/contact/qna/list");
-        const data = res.data.data;
-        const formattedData = data.content.map((item: any) => ({
+        const content = res?.data?.data?.content ?? [];
+        const formattedData = content.map((item: any) => ({
           ...item,
           status: item.answerAt ? "답변완료" : "답변대기",
           createdAt: dayjs(item.createdAt).format("YYYY-MM-DD"),
@@ -57,7 +57,7 @@ export default function InquiryList() {
   if (inquiries.length === 0) {
     return (
       <div className="text-center text-gray-500 dark:text-gray-400 py-6">
-        아직 등록된 문의 내역이 없습니다.
+        등록된 문의 내역이 없습니다.
       </div>
     );
   }

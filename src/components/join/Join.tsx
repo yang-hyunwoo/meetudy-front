@@ -42,6 +42,7 @@ export default function SignupForm() {
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [recaptchaToken, setRecaptchaToken] = useState("");
 
   const passwordConfirmInputRef = useRef<HTMLInputElement>(null);
   const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -54,15 +55,6 @@ export default function SignupForm() {
     setMounted(true);
   }, []);
 
-  const JoinMemberReqDto = {
-    email: email,
-    name: name,
-    nickName: nickname,
-    birth: birthday,
-    phoneNumber: hpNum,
-    password: password,
-    isEmailAgreed: agreeEmail,
-  };
   const EMAIL_REGEX = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
   const NAME_REGEX = /^[가-힣a-zA-Z]+$/;
   const EMAIL_NOT_NULL = "이메일은 공백일 수 없습니다.";
@@ -83,6 +75,15 @@ export default function SignupForm() {
       setEmailError("");
     }
   };
+  useEffect(() => {
+    if (!document.querySelector("#recaptcha-script")) {
+      const script = document.createElement("script");
+      script.id = "recaptcha-script";
+      script.src = `https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`;
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
 
   /**
    * 이름 포커스 유효성 검사
@@ -249,9 +250,26 @@ export default function SignupForm() {
     }
     setIsLoading(true); // 로딩 시작
     try {
+      if (!window.grecaptcha) return alert("reCAPTCHA 로드 실패");
+      const token = await window.grecaptcha.execute(
+        process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!,
+        { action: "join" },
+      );
+
+      const JoinMemberReqDto = {
+        email: email,
+        name: name,
+        nickName: nickname,
+        birth: birthday,
+        phoneNumber: hpNum,
+        password: password,
+        isEmailAgreed: agreeEmail,
+        recaptchaToken: token,
+      };
+
       const res = await api.post("/join", JoinMemberReqDto);
       //회원가입 완료 페이지
-      router.push("/join/success");
+      //router.push("/join/success");
     } catch (error) {
       //에러 검증 실패
       if (axios.isAxiosError(error)) {

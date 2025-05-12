@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { NOTICE_TYPE_DISPLAY_MAP } from "@/enum/contactEnum";
 interface NoticeListItemProps {
-  id: string;
+  id: number;
   title: string;
   noticeType: string;
   createdAt: string;

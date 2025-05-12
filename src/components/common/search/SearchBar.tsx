@@ -19,7 +19,7 @@ export default function SearchBar({
   };
 
   return (
-    <div className="relative w-full max-w-md mx-auto mb-6">
+    <div className="relative flex-1">
       <Input
         placeholder="찾고자 하는 내용을 입력하세요."
         value={searchInput}
