@@ -3,49 +3,58 @@
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer"; // ← 경로 맞게 수정
+import Footer from "@/components/layout/Footer";
 import { usePathname } from "next/navigation";
 import NextTopLoader from "nextjs-toploader";
-import { useAuth } from "@/hooks/useAuth";
+import { AuthProvider, useAuthContext } from "@/context/AuthContext";
 import { api } from "@/lib/axios";
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { isLoggedIn } = useAuth();
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <AuthProvider>
+            {" "}
+            {/* ⭐ Provider로 전체 감싸기 */}
+            <NextTopLoader color="#7c3aed" height={3} showSpinner={false} />
+            <LayoutContents>{children}</LayoutContents>
+          </AuthProvider>
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}
+
+// ⭐ 기존 구조 유지 + useAuthContext로 변경
+function LayoutContents({ children }: { children: React.ReactNode }) {
+  const { isLoggedIn, checkAuth } = useAuthContext(); // ⭐ 수정된 부분
+  const pathname = usePathname();
+  const authPages = ["/login", "/join"];
+  const isAuthPage = authPages.some((path) => pathname?.startsWith(path));
+
   const handleLogout = async () => {
     try {
       await api.post("/logout");
       localStorage.removeItem("accessToken");
+      checkAuth(); // ⭐ 상태 업데이트
       window.location.href = "/";
     } catch (err) {
       console.error("로그아웃 실패", err);
     }
   };
 
-  const pathname = usePathname();
-  const authPages = ["/login", "/join"];
-  const isAuthPage = authPages.some((path) => pathname?.startsWith(path));
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <NextTopLoader color="#7c3aed" height={3} showSpinner={false} />
-          <div className="flex flex-col min-h-screen">
-            {/* Header */}
-            {!isAuthPage && (
-              <Header isLoggedIn={isLoggedIn} onLogout={handleLogout} />
-            )}
-
-            {/* Main content */}
-            <main className="flex-1">{children}</main>
-
-            {/* Footer */}
-            <Footer />
-          </div>
-        </ThemeProvider>
-      </body>
-    </html>
+    <div className="flex flex-col min-h-screen">
+      {!isAuthPage && (
+        <Header isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+      )}
+      <main className="flex-1">{children}</main>
+      <Footer />
+    </div>
   );
 }

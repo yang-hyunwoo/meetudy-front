@@ -15,6 +15,7 @@ import {
 import { api } from "@/lib/axios";
 import { useEffect } from "react";
 import dayjs from "dayjs";
+import { useAuthContext } from "@/context/AuthContext";
 
 interface FreePageReqDto {
   id: string;
@@ -43,7 +44,7 @@ export default function BoardList() {
   const [searchType, setSearchType] = useState<"ALL" | "TITLE" | "NICKNAME">(
     "ALL",
   );
-
+  const { isLoggedIn } = useAuthContext();
   useEffect(() => {
     fetchNotice();
   }, [currentPage]);
@@ -155,13 +156,13 @@ export default function BoardList() {
       )}
 
       {/*  글쓰기 버튼 (맨 아래로 이동) */}
-      {/* {isLoggedIn && (
+      {isLoggedIn && (
         <div className="flex justify-end mt-6">
           <Link href="/board/write">
             <Button size="sm">글쓰기</Button>
           </Link>
         </div>
-      )} */}
+      )}
     </div>
   );
 }
