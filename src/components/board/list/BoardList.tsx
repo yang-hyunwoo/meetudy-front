@@ -58,7 +58,7 @@ export default function BoardList() {
         searchKeyword: searchInput,
       };
 
-      const res = await api.get("/board/list", { params });
+      const res = await api.get("/free-board/list", { params });
 
       if (res.data.httpCode === 200) {
         setTotalPages(res.data.data.totalPages);
