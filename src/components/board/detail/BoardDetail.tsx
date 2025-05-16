@@ -7,6 +7,8 @@ import StudyCommentList from "@/components/common/comment/CommentList";
 import StudyCommentForm from "@/components/common/comment/CommentForm";
 import Link from "next/link";
 import { List } from "lucide-react";
+import { useEffect } from "react";
+import dayjs from "dayjs";
 
 interface Post {
   id: string;
@@ -26,11 +28,19 @@ interface Comment {
 }
 
 interface BoardDetailProps {
-  post: Post;
+  post?: any;
+  errorMessage?: string;
 }
 
-export default function BoardDetail({ post }: BoardDetailProps) {
+export default function BoardDetail({ post, errorMessage }: BoardDetailProps) {
+  console.log(post);
   const router = useRouter();
+  useEffect(() => {
+    if (errorMessage) {
+      alert(errorMessage);
+      router.back(); // 이전 페이지로 이동
+    }
+  }, [errorMessage, router]);
 
   // 댓글 상태 추가
   const [comments, setComments] = useState<Comment[]>([
@@ -85,22 +95,23 @@ export default function BoardDetail({ post }: BoardDetailProps) {
     alert("삭제 완료!");
     router.push("/study/board");
   };
-
+  if (!post) return null; // 오류로 빠지면 렌더링 안함
   return (
-    <div className="space-y-6">
+    <div className="max-w-3xl mx-auto py-16 px-4">
       {/* 게시글 제목/작성자/작성일 */}
       <div className="border-b pb-4">
         <h1 className="text-2xl font-bold">{post.title}</h1>
         <div className="text-sm text-gray-500 flex justify-between mt-2">
           <span>{post.author}</span>
-          <span>{post.createdAt}</span>
+          <span>{dayjs(post.createdAt).format("YYYY-MM-DD")}</span>
         </div>
       </div>
 
       {/* 게시글 본문 */}
-      <div className="whitespace-pre-line text-gray-800 dark:text-gray-300">
-        {post.content}
-      </div>
+      <div
+        className="text-gray-800 dark:text-gray-300"
+        dangerouslySetInnerHTML={{ __html: post.content }}
+      ></div>
 
       {/* 수정/삭제 버튼 */}
       {post.isAuthor && (

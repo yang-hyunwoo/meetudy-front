@@ -1,21 +1,61 @@
 import BoardDetail from "@/components/board/detail/BoardDetail";
+import axios from "axios";
 
-export default function BoardDetailPage() {
-  const isLoggedIn = true; // 나중에 진짜 로그인 정보 가져오기
-
-  // TODO: 여기서 실제 API 호출해서 가져와야 함 (지금은 목 데이터)
-  const post = {
-    id: "1",
-    title: "자유게시판 테스트 글",
-    content: "이것은 자유게시판 테스트 내용입니다.\n줄바꿈도 지원합니다.",
-    author: "hyeonu",
-    createdAt: "2025-04-28",
-    isAuthor: true, // 나중에 로그인 유저랑 작성자 비교
+interface PageProps {
+  params: {
+    id: string;
   };
-
-  return (
-    <div className="max-w-3xl mx-auto p-6">
-      <BoardDetail post={post} />
-    </div>
-  );
 }
+
+export default async function BoardDetailPage({ params }: PageProps) {
+  try {
+    const res = await fetch(
+      `http://localhost:8080/api/free-board/${params.id}`,
+      {
+        cache: "no-store",
+      },
+    );
+    const data = await res.json();
+
+    if (res.status !== 200 || !data.data) {
+      return (
+        <BoardDetail errorMessage="게시글이 존재하지 않거나 삭제되었습니다." />
+      );
+    }
+
+    return <BoardDetail post={data.data} />;
+  } catch (err) {
+    return <BoardDetail errorMessage="서버 오류가 발생했습니다." />;
+  }
+}
+
+//   const isLoggedIn = true; // 나중에 진짜 로그인 정보 가져오기
+
+//   const res = await fetch(`http://localhost:8080/api/free-board/${postId}`, {
+//     // 절대 경로 필요! 서버 컴포넌트는 브라우저가 아님
+//     cache: "no-store", // ← ISR 캐싱 방지 (선택)
+//   });
+
+//   let postData;
+//   const data = await res.json(); // ← 여기가 실제 서버 데이터!
+//   if (data.httpCode == 200) {
+//     postData = data.data;
+//   } else {
+//     alert(data.errCodeMsg);
+//     return;
+//   }
+//   const post = {
+//     id: postData.id,
+//     title: postData.title,
+//     content: postData.content,
+//     author: postData.writeNickname,
+//     createdAt: postData.createdAt,
+//     isAuthor: postData.modifyChk,
+//   };
+
+//   return (
+//     <div className="max-w-3xl mx-auto p-6">
+//       <BoardDetail post={post} />
+//     </div>
+//   );
+// }
