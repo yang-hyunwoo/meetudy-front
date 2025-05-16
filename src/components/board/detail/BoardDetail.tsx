@@ -8,6 +8,7 @@ import StudyCommentForm from "@/components/common/comment/CommentForm";
 import Link from "next/link";
 import { List } from "lucide-react";
 import { useEffect } from "react";
+import dayjs from "dayjs";
 
 interface Post {
   id: string;
@@ -32,6 +33,7 @@ interface BoardDetailProps {
 }
 
 export default function BoardDetail({ post, errorMessage }: BoardDetailProps) {
+  console.log(post);
   const router = useRouter();
   useEffect(() => {
     if (errorMessage) {
@@ -95,13 +97,13 @@ export default function BoardDetail({ post, errorMessage }: BoardDetailProps) {
   };
   if (!post) return null; // 오류로 빠지면 렌더링 안함
   return (
-    <div className="space-y-6">
+    <div className="max-w-3xl mx-auto py-16 px-4">
       {/* 게시글 제목/작성자/작성일 */}
       <div className="border-b pb-4">
         <h1 className="text-2xl font-bold">{post.title}</h1>
         <div className="text-sm text-gray-500 flex justify-between mt-2">
           <span>{post.author}</span>
-          <span>{post.createdAt}</span>
+          <span>{dayjs(post.createdAt).format("YYYY-MM-DD")}</span>
         </div>
       </div>
 
