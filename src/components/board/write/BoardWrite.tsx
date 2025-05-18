@@ -22,7 +22,6 @@ export default function BoardForm({
   postId,
   errorMessage,
 }: BoardFormProps) {
-  console.log(postId);
   const router = useRouter();
   const [title, setTitle] = useState(defaultTitle);
   const [titleError, setTitleError] = useState("");
@@ -68,7 +67,6 @@ export default function BoardForm({
         id: postId,
       };
       let res;
-
       if (FreeWriteReqDto.id) {
         res = await api.put("/private/free-board/update", FreeWriteReqDto);
       } else {
