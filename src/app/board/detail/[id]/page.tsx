@@ -10,7 +10,6 @@ interface PageProps {
 }
 
 export default async function BoardDetailPage({ params }: PageProps) {
-  console.log("params.id", params.id); // ✅ 문자열 출력
   const cookieStore = cookies() as unknown as RequestCookies;
   const accessToken = cookieStore.get("accessToken")?.value;
   const postId = params.id;

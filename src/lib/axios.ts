@@ -25,12 +25,11 @@ api.interceptors.response.use(
   async (error: any) => {
     // ✅ 요청 URL 확인
     const requestUrl = error.config?.url ?? "";
-    console.log(error);
-    // ✅ /user/me 요청이면 return 그대로 (에러 넘기기만)
-    console.log(error?.response.data.error);
+
     if (
       error?.response.data.code == "SC_ERR400" ||
       error?.response.data.code == "SC_ERR401" ||
+      error?.response.data.code == "SC_ERR402" ||
       error?.response.data.code == "SC_ERR404"
     ) {
       localStorage.removeItem("accessToken");

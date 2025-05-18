@@ -14,6 +14,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { Node, mergeAttributes } from "@tiptap/core";
 import "./TiptapEditor.css";
+import axios from "axios";
 
 const ResizableImage = Node.create({
   name: "resizableImage",
@@ -26,17 +27,36 @@ const ResizableImage = Node.create({
     return {
       src: {},
       width: { default: "300px" },
+      height: { default: "auto" },
     };
   },
 
   parseHTML() {
-    return [{ tag: "img[data-resizable]" }];
+    return [
+      {
+        tag: "img[data-resizable]",
+      },
+      {
+        tag: "img", // 일반 <img> 태그도 허용
+        getAttrs: (node) => {
+          if (!(node instanceof HTMLImageElement)) return false;
+          return {
+            src: node.getAttribute("src"),
+            width: node.style.width || node.getAttribute("width") || "300px",
+            height: node.style.height || node.getAttribute("height") || "auto",
+          };
+        },
+      },
+    ];
   },
 
   renderHTML({ HTMLAttributes }) {
     return [
       "img",
-      mergeAttributes(HTMLAttributes, { "data-resizable": "true" }),
+      mergeAttributes(HTMLAttributes, {
+        "data-resizable": "true",
+        style: `width: ${HTMLAttributes.width}; height: ${HTMLAttributes.height};`,
+      }),
     ];
   },
 
@@ -46,6 +66,7 @@ const ResizableImage = Node.create({
       img.setAttribute("src", node.attrs.src);
       img.setAttribute("data-resizable", "true");
       img.style.width = node.attrs.width || "300px";
+      img.style.height = node.attrs.height || "auto";
 
       const container = document.createElement("div");
       container.contentEditable = "false";
@@ -55,6 +76,10 @@ const ResizableImage = Node.create({
       const handle = document.createElement("div");
       handle.className = "resize-handle";
       container.appendChild(handle);
+
+      const verticalHandle = document.createElement("div");
+      verticalHandle.className = "resize-handle-vertical"; // CSS로 아래쪽에 위치
+      container.appendChild(verticalHandle);
 
       let startX = 0;
       let startWidth = 0;
@@ -106,6 +131,34 @@ const ResizableImage = Node.create({
         document.addEventListener("mouseup", onMouseUp);
       };
 
+      let startY = 0;
+      let startHeight = 0;
+      verticalHandle.addEventListener("mousedown", (event) => {
+        event.preventDefault();
+        startY = event.clientY;
+        startHeight = img.offsetHeight;
+
+        const onMouseMove = (moveEvent: MouseEvent) => {
+          const newHeight = startHeight + (moveEvent.clientY - startY);
+          img.style.height = `${newHeight}px`;
+
+          editor.view.dispatch(
+            editor.state.tr.setNodeMarkup(savedPos!, undefined, {
+              ...node.attrs,
+              height: `${newHeight}px`,
+            }),
+          );
+        };
+
+        const onMouseUp = () => {
+          document.removeEventListener("mousemove", onMouseMove);
+          document.removeEventListener("mouseup", onMouseUp);
+        };
+
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
+      });
+
       handle.addEventListener("mousedown", onMouseDown);
       return { dom: container, contentDOM: null };
     };
@@ -149,15 +202,31 @@ export default function TiptapEditor({
         if (!hasFiles || !editor) return false;
 
         const file = event.dataTransfer.files[0];
-        const reader = new FileReader();
-        reader.onload = () => {
-          if (!editor || typeof reader.result !== "string") return;
-          editor.commands.insertContent({
-            type: "resizableImage",
-            attrs: { src: reader.result, width: "300px" },
+        const formData = new FormData();
+        formData.append("files", file);
+        axios
+          .post(
+            process.env.NEXT_PUBLIC_API_URL + "/private/file-upload",
+            formData,
+            {
+              headers: {
+                Authorization: localStorage.getItem("accessToken"),
+              },
+            },
+          )
+          .then((response) => {
+            editor.commands.insertContent({
+              type: "resizableImage",
+              attrs: {
+                src: response.data.data.filesDetails[0].fileUrl,
+                width: "300px",
+              },
+            });
+          })
+          .catch((err) => {
+            console.error("이미지 업로드 실패", err);
+            alert("이미지 업로드에 실패했습니다.");
           });
-        };
-        reader.readAsDataURL(file);
         return true;
       },
     },

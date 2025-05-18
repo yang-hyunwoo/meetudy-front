@@ -35,7 +35,6 @@ interface BoardDetailProps {
 }
 
 export default function BoardDetail({ post, errorMessage }: BoardDetailProps) {
-  console.log(post);
   const router = useRouter();
   useEffect(() => {
     if (errorMessage) {
