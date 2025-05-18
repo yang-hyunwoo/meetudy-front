@@ -18,18 +18,31 @@ api.interceptors.response.use(
     const newToken = response.headers["authorization"];
     if (newToken) {
       localStorage.setItem("accessToken", newToken);
+      document.cookie = `accessToken=${newToken}; path=/;`;
     }
     return response;
   },
-  async (error) => {
+  async (error: any) => {
     // ✅ 요청 URL 확인
     const requestUrl = error.config?.url ?? "";
-
+    console.log(error);
     // ✅ /user/me 요청이면 return 그대로 (에러 넘기기만)
+    console.log(error?.response.data.error);
+    if (
+      error?.response.data.code == "SC_ERR400" ||
+      error?.response.data.code == "SC_ERR401" ||
+      error?.response.data.code == "SC_ERR404"
+    ) {
+      localStorage.removeItem("accessToken");
+      document.cookie =
+        "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    }
     if (requestUrl.includes("/user/me")) {
       return Promise.reject(error);
     }
-
+    if (error?.message === "Network Error") {
+      alert("서버에 연결할 수 없습니다. 잠시후 시도 해주세요.");
+    }
     // ✅ 그 외 요청은 redirect
     if (error.response?.data?.errCode === "ERR_004") {
       alert("로그인 정보가 없습니다\n로그인 페이지로 이동합니다.");

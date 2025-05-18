@@ -1,22 +1,52 @@
+export const dynamic = "force-dynamic";
 import BoardForm from "@/components/board/write/BoardWrite";
+import { cookies } from "next/headers";
+import { RequestCookies } from "next/dist/compiled/@edge-runtime/cookies";
 
-export default function BoardEditPage({ params }: { params: { id: string } }) {
+interface BoardFormProps {
+  defaultTitle: string;
+  defaultContent: string;
+  postId: string;
+}
+export default async function BoardEditPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const cookieStore = cookies() as unknown as RequestCookies;
+  const accessToken = cookieStore.get("accessToken")?.value;
   const postId = params.id;
 
-  // 임시 데이터 (나중에 fetch로 바꿀 것)
-  const existingPost = {
-    title: "기존 제목",
-    content: "<p>기존 내용입니다</p>",
-  };
+  try {
+    const res = await fetch(
+      `http://localhost:8080/api/private/free-board/${postId}`,
+      {
+        cache: "no-store",
+        headers: {
+          Authorization: `${accessToken}`,
+        },
+      },
+    );
 
-  return (
-    <div className="max-w-3xl mx-auto p-6">
-      <BoardForm
-        mode="edit"
-        postId={postId}
-        defaultTitle={existingPost.title}
-        defaultContent={existingPost.content}
-      />
-    </div>
-  );
+    const data = await res.json();
+    console.log(data);
+
+    if (res.status !== 200 || !data.data) {
+      return (
+        <BoardForm errorMessage="게시글이 존재하지 않거나 삭제되었습니다." />
+      );
+    }
+
+    return (
+      <div className="max-w-3xl mx-auto p-6">
+        <BoardForm
+          postId={postId}
+          defaultTitle={data.data.title}
+          defaultContent={data.data.content}
+        />
+      </div>
+    );
+  } catch (err) {
+    return <BoardForm errorMessage="서버 오류가 발생했습니다." />;
+  }
 }

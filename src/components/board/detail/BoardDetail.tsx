@@ -9,6 +9,8 @@ import Link from "next/link";
 import { List } from "lucide-react";
 import { useEffect } from "react";
 import dayjs from "dayjs";
+import { api } from "@/lib/axios";
+import axios from "axios";
 
 interface Post {
   id: string;
@@ -89,11 +91,17 @@ export default function BoardDetail({ post, errorMessage }: BoardDetailProps) {
     }
   };
 
-  const handleDeletePost = () => {
+  const handleDeletePost = async () => {
     if (!confirm("정말 삭제하시겠습니까?")) return;
-    console.log(`✅ 게시글 삭제: ${post.id}`);
-    alert("삭제 완료!");
-    router.push("/study/board");
+    try {
+      const res = await api.put(`/private/free-board/${post.id}/delete`);
+      if (res.data.httpCode == 200) {
+        alert(res.data.message);
+        router.push("/board/list");
+      }
+    } catch (error: any) {
+      alert(error.response?.data?.data.message);
+    }
   };
   if (!post) return null; // 오류로 빠지면 렌더링 안함
   return (
@@ -114,7 +122,7 @@ export default function BoardDetail({ post, errorMessage }: BoardDetailProps) {
       ></div>
 
       {/* 수정/삭제 버튼 */}
-      {post.isAuthor && (
+      {post.modifyChk && (
         <div className="flex gap-2 justify-end">
           <Button
             variant="outline"

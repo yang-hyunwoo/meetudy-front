@@ -70,7 +70,6 @@ export default function BoardList() {
         setFreeList(formattedData);
       }
     } catch (error) {
-      console.error("공지사항 로딩 실패", error);
     } finally {
       setIsLoading(false);
     }

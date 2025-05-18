@@ -41,6 +41,8 @@ function LayoutContents({ children }: { children: React.ReactNode }) {
     try {
       await api.post("/logout");
       localStorage.removeItem("accessToken");
+      document.cookie =
+        "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       checkAuth(); // ⭐ 상태 업데이트
       window.location.href = "/";
     } catch (err) {

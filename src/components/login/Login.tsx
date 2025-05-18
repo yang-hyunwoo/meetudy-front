@@ -24,6 +24,8 @@ export default function Login() {
   useEffect(() => setMounted(true), []);
   useEffect(() => {
     localStorage.removeItem("accessToken");
+    document.cookie =
+      "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
   }, []);
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -40,7 +42,9 @@ export default function Login() {
     setIsLoading(true); // 로딩 시작
     try {
       const res = await api.post("/login", { email, password });
-      localStorage.setItem("accessToken", res.headers["authorization"]);
+      const accessToken = res.headers["authorization"];
+      localStorage.setItem("accessToken", accessToken);
+      document.cookie = `accessToken=${accessToken}; path=/;`;
       window.location.href = redirectTo;
     } catch (error) {
       if (axios.isAxiosError(error)) {

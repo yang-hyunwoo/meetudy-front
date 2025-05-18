@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,15 +13,17 @@ interface BoardFormProps {
   defaultTitle?: string;
   defaultContent?: string;
   postId?: string; // 수정할 때만 필요
+  errorMessage?: string;
 }
 
 export default function BoardForm({
   defaultTitle = "",
   defaultContent = "",
   postId,
+  errorMessage,
 }: BoardFormProps) {
+  console.log(postId);
   const router = useRouter();
-
   const [title, setTitle] = useState(defaultTitle);
   const [titleError, setTitleError] = useState("");
   const [content, setContent] = useState(defaultContent);
@@ -30,6 +32,13 @@ export default function BoardForm({
 
   const TITLE_NOT_NULL = "제목은 공백일 수 없습니다.";
   const CONTENT_NOT_NULL = "내용은 공백일 수 없습니다.";
+
+  useEffect(() => {
+    if (errorMessage) {
+      alert(errorMessage);
+      router.back(); // 이전 페이지로 이동
+    }
+  }, [errorMessage, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,16 +65,19 @@ export default function BoardForm({
       const FreeWriteReqDto = {
         title: title,
         content: content,
-        postId: postId,
+        id: postId,
       };
+      let res;
 
-      const res = await api.post("/private/free-board/insert", FreeWriteReqDto);
-      if (res.data.httpCode == 201) {
+      if (FreeWriteReqDto.id) {
+        res = await api.put("/private/free-board/update", FreeWriteReqDto);
+      } else {
+        res = await api.post("/private/free-board/insert", FreeWriteReqDto);
+      }
+      if (res.data.httpCode == 201 || res.data.httpCode == 200) {
         alert(res.data.message);
         router.push("/board/list");
       }
-      //회원가입 완료 페이지
-      //router.push("/join/success");
     } catch (error) {
       //에러 검증 실패
       if (axios.isAxiosError(error)) {
@@ -144,7 +156,13 @@ export default function BoardForm({
           </Button>
           <Button type="submit" disabled={isLoading}>
             {isLoading && <Spinner />}
-            {isLoading ? "작성 중..." : "작성하기"}
+            {isLoading
+              ? postId
+                ? "수정 중..."
+                : "작성 중..."
+              : postId
+                ? "수정하기"
+                : "작성하기"}
           </Button>
         </div>
       </form>
