@@ -11,7 +11,7 @@ import { useEffect } from "react";
 import dayjs from "dayjs";
 import { api } from "@/lib/axios";
 import axios from "axios";
-
+import { useAuthContext } from "@/context/AuthContext";
 interface Post {
   id: string;
   title: string;
@@ -43,53 +43,105 @@ export default function BoardDetail({ post, errorMessage }: BoardDetailProps) {
     }
   }, [errorMessage, router]);
 
+  useEffect(() => {
+    CommentList(post.id);
+  }, [post.id]);
+
+  const CommentList = async (postId: any) => {
+    const params: any = {
+      targetType: "freeboard",
+      targetId: postId,
+    };
+    const res = await api.get("/comment/list", { params });
+    const rawComments = res.data.data;
+    const formattedComments: Comment[] = rawComments.map((c: any) => ({
+      id: c.id.toString(),
+      author: c.writeNickname,
+      content: c.content,
+      createdAt: dayjs(c.createdAt).format("YYYY-MM-DD HH:mm"),
+      isAuthor: c.modifyChk,
+    }));
+
+    setComments(formattedComments);
+  };
+
   // 댓글 상태 추가
-  const [comments, setComments] = useState<Comment[]>([
-    {
-      id: "1",
-      author: "user01",
-      content: "좋은 글 감사합니다!",
-      createdAt: "2025.04.28",
-    },
-    {
-      id: "2",
-      author: "hyeonu",
-      content: "추가 질문은 댓글로 주세요.",
-      createdAt: "2025.04.28",
-      isAuthor: true,
-    },
-  ]);
+  const { isLoggedIn } = useAuthContext();
+  const [isLoading, setIsLoading] = useState(false);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [commentInput, setCommentInput] = useState("");
 
-  const handleSubmitComment = () => {
-    if (!commentInput.trim()) return;
-
-    const newComment: Comment = {
-      id: String(comments.length + 1),
-      author: "익명", // TODO: 나중에 로그인 유저로 교체
+  //댓글 업력
+  const handleSubmitComment = async () => {
+    if (!isLoggedIn) {
+      alert("로그인 후 댓글 작성이 가능합니다.");
+      return;
+    }
+    const commentWriteReqDto = {
+      targetType: "freeboard",
+      targetId: post.id,
       content: commentInput,
-      createdAt: new Date().toISOString().slice(0, 10).replace(/-/g, "."),
     };
+    if (!commentInput.trim()) return;
+    try {
+      setIsLoading(true); // 로딩 시작
+      const res = await api.post("/private/comment/insert", commentWriteReqDto);
+      if (res.data.httpCode == 201) {
+        const resdata = res.data.data;
+        const newComment: Comment = {
+          id: resdata.id,
+          author: resdata.writeNickname,
+          content: resdata.content,
+          createdAt: dayjs(resdata.createdAt).format("YYYY-MM-DD HH:mm"),
+          isAuthor: resdata.modifyChk,
+        };
 
-    setComments([newComment, ...comments]);
-    setCommentInput("");
+        setComments([newComment, ...comments]);
+        setCommentInput("");
+      }
+    } catch (error) {
+    } finally {
+      setIsLoading(false); // 로딩 종료
+    }
   };
 
-  const handleDeleteComment = (id: string) => {
+  //댓글 삭제
+  const handleDeleteComment = async (id: string) => {
     if (confirm("댓글을 삭제하시겠습니까?")) {
-      setComments((prev) => prev.filter((c) => c.id !== id));
+      try {
+        const res = await api.put(`/private/comment/${id}/delete`);
+        if (res.data.httpCode == 200) {
+          setComments((prev) => prev.filter((c) => c.id !== id));
+        }
+      } catch (error: any) {
+        alert(error.response?.data?.data.message);
+      } finally {
+      }
     }
   };
 
-  const handleEditComment = (id: string) => {
-    const newContent = prompt("수정할 내용을 입력하세요");
-    if (newContent) {
-      setComments((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, content: newContent } : c)),
-      );
+  //댓글 수정
+  const handleEditComment = async (id: string, newContent: string) => {
+    const commentUpdateReqDto = {
+      id: id,
+      targetType: "freeboard",
+      targetId: post.id,
+      content: newContent,
+    };
+    try {
+      const res = await api.put("/private/comment/update", commentUpdateReqDto);
+      if (res.data.httpCode == 200) {
+        setComments((prev) =>
+          prev.map((c) => (c.id === id ? { ...c, content: newContent } : c)),
+        );
+      }
+    } catch (error: any) {
+      alert(error.response?.data?.data.message);
+    } finally {
     }
   };
 
+  //게시판 삭제
   const handleDeletePost = async () => {
     if (!confirm("정말 삭제하시겠습니까?")) return;
     try {
@@ -144,6 +196,7 @@ export default function BoardDetail({ post, errorMessage }: BoardDetailProps) {
       {/* 댓글 작성 폼 */}
       <StudyCommentForm
         value={commentInput}
+        isLoading={isLoading}
         onChange={setCommentInput}
         onSubmit={handleSubmitComment}
       />
