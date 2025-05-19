@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 
 interface CommentFormProps {
   value: string;
+  isLoading: boolean;
   onChange: (val: string) => void;
   onSubmit: () => void;
 }
 
 export default function CommentForm({
   value,
+  isLoading,
   onChange,
   onSubmit,
 }: CommentFormProps) {
@@ -32,7 +34,7 @@ export default function CommentForm({
                     bg-white hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 
                     text-gray-800 dark:text-gray-200 rounded-md transition"
         >
-          등록
+          {isLoading ? "등록 중..." : "등록"}
         </Button>
       </div>
     </div>
