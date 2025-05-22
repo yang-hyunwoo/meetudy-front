@@ -3,8 +3,8 @@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface CommentEnabledSelectorProps {
-  value: "yes" | "no";
-  onChange: (value: "yes" | "no") => void;
+  value: boolean;
+  onChange: (value: boolean) => void;
 }
 
 export default function CommentEnabledSelector({
@@ -17,20 +17,20 @@ export default function CommentEnabledSelector({
         댓글 여부
       </label>
       <RadioGroup
-        value={value}
-        onValueChange={(val: "yes" | "no") => onChange(val)}
+        value={value ? "true" : "false"}
+        onValueChange={(val) => onChange(val === "true")}
         className="flex gap-4"
       >
         <div className="flex items-center space-x-2">
-          <RadioGroupItem value="yes" id="comment-yes" />
-          <label htmlFor="comment-yes" className="text-sm">
-            사용
+          <RadioGroupItem value="false" id="comment-no" />
+          <label htmlFor="comment-no" className="text-sm">
+            미사용
           </label>
         </div>
         <div className="flex items-center space-x-2">
-          <RadioGroupItem value="no" id="comment-no" />
-          <label htmlFor="comment-no" className="text-sm">
-            미사용
+          <RadioGroupItem value="true" id="comment-yes" />
+          <label htmlFor="comment-yes" className="text-sm">
+            사용
           </label>
         </div>
       </RadioGroup>

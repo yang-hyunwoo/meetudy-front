@@ -3,8 +3,8 @@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface JoinTypeSelectorProps {
-  value: "free" | "approval";
-  onChange: (value: "free" | "approval") => void;
+  value: boolean;
+  onChange: (value: boolean) => void;
 }
 
 export default function JoinTypeSelector({
@@ -17,18 +17,18 @@ export default function JoinTypeSelector({
         가입 방식
       </label>
       <RadioGroup
-        value={value}
-        onValueChange={(val: "free" | "approval") => onChange(val)}
+        value={value ? "true" : "false"} // 문자열로 넣되
+        onValueChange={(val) => onChange(val === "true")} // boolean으로 변환해서 반환
         className="flex gap-4"
       >
         <div className="flex items-center space-x-2">
-          <RadioGroupItem value="free" id="join-free" />
+          <RadioGroupItem value="false" id="join-free" />
           <label htmlFor="join-free" className="text-sm">
             자유가입
           </label>
         </div>
         <div className="flex items-center space-x-2">
-          <RadioGroupItem value="approval" id="join-approval" />
+          <RadioGroupItem value="true" id="join-approval" />
           <label htmlFor="join-approval" className="text-sm">
             승인가입
           </label>

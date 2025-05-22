@@ -4,9 +4,9 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface LateFeeSelectorProps {
-  value: "yes" | "no";
+  value: boolean;
   amount: string;
-  onLateFeeChange: (value: "yes" | "no") => void;
+  onLateFeeChange: (value: boolean) => void;
   onAmountChange: (value: string) => void;
 }
 
@@ -22,25 +22,25 @@ export default function LateFeeSelector({
         지각비 여부
       </label>
       <RadioGroup
-        value={value}
-        onValueChange={(val: "yes" | "no") => onLateFeeChange(val)}
+        value={value ? "true" : "false"}
+        onValueChange={(val) => onLateFeeChange(val === "true")}
         className="flex gap-4 mb-2"
       >
         <div className="flex items-center space-x-2">
-          <RadioGroupItem value="no" id="late-no" />
+          <RadioGroupItem value="false" id="late-no" />
           <label htmlFor="late-no" className="text-sm">
             미사용
           </label>
         </div>
         <div className="flex items-center space-x-2">
-          <RadioGroupItem value="yes" id="late-yes" />
+          <RadioGroupItem value="true" id="late-yes" />
           <label htmlFor="late-yes" className="text-sm">
             사용
           </label>
         </div>
       </RadioGroup>
 
-      {value === "yes" && (
+      {value && (
         <Input
           type="number"
           placeholder="지각비 금액 (숫자만)"
