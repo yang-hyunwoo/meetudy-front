@@ -7,11 +7,28 @@ interface OtpModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit?: (code: string) => void;
+  errorMsg?: string | null;
+  setErrorMsg?: (msg: string | null) => void;
+  resetTrigger?: number;
 }
 
-export default function OtpModal({ isOpen, onClose, onSubmit }: OtpModalProps) {
+export default function OtpModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  errorMsg,
+  setErrorMsg,
+  resetTrigger,
+}: OtpModalProps) {
   const inputsRef = useRef<HTMLInputElement[]>([]);
-
+  useEffect(() => {
+    if (resetTrigger !== undefined) {
+      inputsRef.current.forEach((input) => {
+        if (input) input.value = "";
+      });
+      inputsRef.current[0]?.focus();
+    }
+  }, [resetTrigger]);
   useEffect(() => {
     if (isOpen) {
       inputsRef.current[0]?.focus();
@@ -46,6 +63,9 @@ export default function OtpModal({ isOpen, onClose, onSubmit }: OtpModalProps) {
                 if (e.target.value && i < 5) {
                   inputsRef.current[i + 1]?.focus();
                 }
+                if (errorMsg && setErrorMsg) {
+                  setErrorMsg(null);
+                }
               }}
             />
           ))}
@@ -53,6 +73,7 @@ export default function OtpModal({ isOpen, onClose, onSubmit }: OtpModalProps) {
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
           스터디 그룹 비밀번호를 입력해주세요.
         </p>
+        {errorMsg && <p className="text-sm text-red-500 mb-2">{errorMsg}</p>}
         <div className="flex justify-end gap-2">
           <Button variant="ghost" onClick={onClose}>
             취소
