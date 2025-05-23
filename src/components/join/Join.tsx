@@ -269,7 +269,7 @@ export default function SignupForm() {
 
       const res = await api.post("/join", JoinMemberReqDto);
       //회원가입 완료 페이지
-      //router.push("/join/success");
+      router.push("/join/success");
     } catch (error) {
       //에러 검증 실패
       if (axios.isAxiosError(error)) {

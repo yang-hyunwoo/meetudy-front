@@ -346,9 +346,9 @@ export default function GroupCreatePage({
       dateValidError,
     ];
     // 하나라도 에러가 있다면 중단
-    // if (errorList.some(Boolean)) {
-    //   return;
-    // }
+    if (errorList.some(Boolean)) {
+      return;
+    }
     const values = {
       title,
       summary,
@@ -427,7 +427,8 @@ export default function GroupCreatePage({
       }
 
       const res = await api.post("/private/study-group/insert", values);
-      router.push("/study/group/list");
+
+      router.push("/study/list/" + region.toLowerCase());
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.data.errCode == "ERR_017") {
