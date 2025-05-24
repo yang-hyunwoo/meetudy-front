@@ -20,11 +20,13 @@ interface GroupListItemProps {
     tag: string;
   };
   onJoinClick: (id: string) => void;
+  onJoinCancelClick: (id: string) => void;
 }
 
 export default function GroupListItem({
   group,
   onJoinClick,
+  onJoinCancelClick,
 }: GroupListItemProps) {
   const tags = group.tag
     ? Array.from(new Set(group.tag.split(",").map((tag) => tag.trim())))
@@ -96,6 +98,7 @@ export default function GroupListItem({
                 <Button
                   size="sm"
                   className="px-3 py-1 text-sm bg-yellow-500 hover:bg-yellow-600 text-white transition"
+                  onClick={() => onJoinCancelClick(group.id)}
                 >
                   요청 취소
                 </Button>
