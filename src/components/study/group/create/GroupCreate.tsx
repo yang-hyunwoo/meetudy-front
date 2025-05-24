@@ -33,7 +33,7 @@ interface GroupFormProps {
     joinType: boolean;
     secret: boolean;
     secretPassword?: string;
-    commentEnabled: boolean;
+    allowComment: boolean;
     isLateFee: boolean;
     lateFeeAmount?: string;
     startDate?: Date;
@@ -106,8 +106,8 @@ export default function GroupCreatePage({
   );
   const [secretPasswordError, setSecretPasswordError] = useState("");
 
-  const [commentEnabled, setCommentEnabled] = useState<boolean>(
-    defaultValues?.commentEnabled ?? false,
+  const [allowComment, setAllowComment] = useState<boolean>(
+    defaultValues?.allowComment ?? false,
   );
 
   const [isLateFee, setIsLateFee] = useState<boolean>(
@@ -240,6 +240,7 @@ export default function GroupCreatePage({
 
   const handleStartDateChange = (value?: Date) => {
     setStartDate(value);
+    setStartDateError(false);
     setDateValidError("");
     if (endDate != undefined && value != undefined) {
       if (value > endDate) {
@@ -250,6 +251,7 @@ export default function GroupCreatePage({
 
   const handleEndDateChange = (value?: Date) => {
     setEndDate(value);
+    setEndDateError(false);
     setDateValidError("");
     if (startDate != undefined && value != undefined) {
       if (value < startDate) {
@@ -359,7 +361,7 @@ export default function GroupCreatePage({
       endDate: endDate?.toISOString().split("T")[0],
       secret,
       secretPassword,
-      commentEnabled,
+      allowComment,
       lateFeeAmount,
       content,
       meetingFrequency,
@@ -430,6 +432,7 @@ export default function GroupCreatePage({
 
       router.push("/study/list/" + region.toLowerCase());
     } catch (error) {
+      console.log(error);
       if (axios.isAxiosError(error)) {
         if (error.response?.data.errCode == "ERR_017") {
           setTimeValidError(error.response?.data.errCodeMsg);
@@ -448,7 +451,6 @@ export default function GroupCreatePage({
     } finally {
       setIsLoading(false); // 로딩 종료
     }
-    // router.push("/group");
   };
 
   const setErrorByField = (field: string, message: string) => {
@@ -731,8 +733,8 @@ export default function GroupCreatePage({
         <hr className="my-6 border-gray-300 dark:border-gray-600" />
         {/* 댓글 여부 */}
         <CommentEnabledSelector
-          value={commentEnabled}
-          onChange={setCommentEnabled}
+          value={allowComment}
+          onChange={setAllowComment}
         />
         <hr className="my-6 border-gray-300 dark:border-gray-600" />
         {/* 지각비 여부 */}

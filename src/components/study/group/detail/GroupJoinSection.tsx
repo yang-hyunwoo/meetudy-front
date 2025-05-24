@@ -7,10 +7,11 @@ interface GroupJoinSectionProps {
   current: number;
   max: number;
   isPrivate: boolean;
-  joinType: "free" | "approval";
-  isJoined: "none" | "joined" | "requested";
-  onJoinClick: () => void;
-  onCancelRequestClick?: () => void;
+  joinType: boolean;
+  isJoined?: string;
+  id: string;
+  onJoinClick: (id: string) => void;
+  onCancelRequestClick: (id: string) => void;
 }
 
 export default function GroupJoinSection({
@@ -19,6 +20,7 @@ export default function GroupJoinSection({
   isPrivate,
   joinType,
   isJoined,
+  id,
   onJoinClick,
   onCancelRequestClick,
 }: GroupJoinSectionProps) {
@@ -36,16 +38,16 @@ export default function GroupJoinSection({
       </div>
 
       {/* 상태별 버튼 처리 */}
-      {isJoined === "joined" ? (
+      {isJoined === "APPROVED" ? (
         <span className="px-3 py-1 text-sm font-medium rounded-md bg-green-500 text-white dark:bg-green-600">
           참여중
         </span>
       ) : current < max ? (
-        joinType === "approval" && isJoined === "requested" ? (
+        joinType && isJoined === "PENDING" ? (
           <Button
             size="sm"
             className="px-3 py-1 text-sm font-medium rounded-md bg-yellow-400 hover:bg-yellow-500 text-white dark:bg-yellow-500 dark:hover:bg-yellow-600"
-            onClick={onCancelRequestClick}
+            onClick={() => onCancelRequestClick(id)}
           >
             요청 취소
           </Button>
@@ -53,7 +55,7 @@ export default function GroupJoinSection({
           <Button
             size="sm"
             className="px-3 py-1 text-sm font-medium rounded-md bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-600 dark:hover:bg-blue-700"
-            onClick={onJoinClick}
+            onClick={() => onJoinClick(id)}
           >
             참여하기
           </Button>

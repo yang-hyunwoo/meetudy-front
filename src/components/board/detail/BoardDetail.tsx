@@ -12,6 +12,8 @@ import dayjs from "dayjs";
 import { api } from "@/lib/axios";
 import axios from "axios";
 import { useAuthContext } from "@/context/AuthContext";
+import "@/components/common/editor/TiptapEditor.css";
+
 interface Post {
   id: string;
   title: string;
@@ -168,7 +170,7 @@ export default function BoardDetail({ post, errorMessage }: BoardDetailProps) {
 
       {/* 게시글 본문 */}
       <div
-        className="text-gray-800 dark:text-gray-300"
+        className="ProseMirror text-gray-800 dark:text-gray-300"
         dangerouslySetInnerHTML={{ __html: post.content }}
       ></div>
 

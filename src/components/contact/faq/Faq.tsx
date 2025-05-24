@@ -52,14 +52,11 @@ export default function Faq() {
       const mappedType = CATEGORY_MAP[selectedCategory];
 
       const params: any = {
+        faqType: mappedType,
         page: currentPage - 1,
         size: ITEMS_PER_PAGE,
         question: searchInput?.trim(),
       };
-
-      if (mappedType && mappedType !== "ALL") {
-        params.faqType = mappedType;
-      }
 
       const res = await api.get("/contact/faq", { params });
 
