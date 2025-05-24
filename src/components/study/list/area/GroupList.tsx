@@ -47,6 +47,10 @@ export default function GroupList({ region }: { region: string }) {
     fetchStudyGroup();
   }, [currentPage]);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const fetchStudyGroup = async () => {
     try {
       const params: any = {
@@ -82,6 +86,7 @@ export default function GroupList({ region }: { region: string }) {
     }
   };
 
+  //비밀방 번호 입력
   const handleOtpSubmit = async (code: string) => {
     if (!selectedGroupId) return;
     try {
@@ -104,8 +109,6 @@ export default function GroupList({ region }: { region: string }) {
         }
       }
     } catch (error) {}
-
-    // 서버에 인증 요청 등 로직 추가 가능
   };
 
   const joinGroup = (id: string) => {
@@ -153,9 +156,41 @@ export default function GroupList({ region }: { region: string }) {
     setIsOtpOpen(true);
   };
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const cancelGroup = (id: string) => {
+    if (!isLoggedIn) {
+      alert("로그인 후 가능 합니다.");
+      return;
+    }
+    if (confirm("요청을 취소하시겠습니까?")) {
+      cancelAxios(id);
+    }
+  };
+
+  const cancelAxios = async (id: string) => {
+    try {
+      const StudyGroupCancelReqDto = {
+        studyGroupId: id,
+      };
+
+      const res = await api.put(
+        "/private/study-group/cancel",
+        StudyGroupCancelReqDto,
+      );
+      if (res.data.httpCode === 200) {
+        setStudyGroupList((prevList) =>
+          prevList.map((group) =>
+            String(group.id) === String(id)
+              ? { ...group, isJoined: "NONE" }
+              : group,
+          ),
+        );
+      }
+    } catch (error) {
+      alert("잠시 후 다시 시도해주세요.");
+      console.log("::::" + error);
+    }
+  };
+
   const handleSearch = () => {
     setSearchTerm(searchInput.trim());
     setCurrentPage(1);
@@ -233,6 +268,9 @@ export default function GroupList({ region }: { region: string }) {
               <GroupListItem
                 key={group.id + group.isJoined}
                 group={group}
+                onJoinCancelClick={(id) => {
+                  cancelGroup(id);
+                }}
                 onJoinClick={(id) => {
                   if (group.secret) {
                     optGroup(id);
