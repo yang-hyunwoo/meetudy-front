@@ -35,7 +35,6 @@ export default function ProfileCard({ profile, onSave }: ProfileCardProps) {
       formData.append("files", file);
 
       const res = await api.post("/private/file-upload", formData);
-      console.log(res);
     }
   };
   const handleSave = () => {
