@@ -415,16 +415,15 @@ export default function GroupCreatePage({
         setSecretPasswordError("");
       }
     }
-    setIsLoading(true); // 로딩 시작
+    setIsLoading(true);
     try {
-      //TODO : 파일 첨부 추가
       const formData = new FormData();
       if (thumbnail) {
         formData.append("files", thumbnail);
         const uploadRes = await api.post("/private/file-upload", formData);
-        const uploadedFileId = uploadRes.data.data?.fileId; // 또는 필요한 key
+        const uploadedFileId = uploadRes.data.data?.fileId;
         if (uploadedFileId) {
-          values.thumbnailFileId = uploadedFileId; // 서버에서 기대하는 필드명
+          values.thumbnailFileId = uploadedFileId;
         }
       }
 
