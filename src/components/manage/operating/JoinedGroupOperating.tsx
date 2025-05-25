@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AttendanceDonutChart from "@/components/manage/joined/AttendanceDonutChart";
 import OperatingGroupCard from "@/components/manage/operating/OperatingGroupCard";
 import OperatingMemberCard from "@/components/manage/operating/OperatingMemberCard";
 import PendingMemberCard from "@/components/manage/operating/PendingMemberCard";
+import EndGroupCard from "@/components/manage/operating/EndGroupCard";
+
+import { api } from "@/lib/axios";
+import dayjs from "dayjs";
 
 interface Member {
   id: string;
@@ -13,19 +17,25 @@ interface Member {
 }
 
 interface JoinedGroup {
+  currentMemberCount: number;
+  maxMemberCount: number;
   id: string;
-  name: string;
-  thumbnail: string;
-  memberCount: number;
-  isClosed: boolean;
+  regionEnum: string;
+  status: string;
+  thumbnailFileUrl?: null;
+  title: string;
 }
 
 interface JoinedGroupOperatingProps {
-  groups: JoinedGroup[];
+  ongoingGroup?: JoinedGroup[];
+  endGroup?: JoinedGroup[];
+  errorMessage?: string;
 }
 
 export default function JoinedGroupOperating({
-  groups,
+  ongoingGroup,
+  endGroup,
+  errorMessage,
 }: JoinedGroupOperatingProps) {
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
@@ -66,37 +76,7 @@ export default function JoinedGroupOperating({
       ],
     },
   };
-  //   const handleCardClick = async (groupId: string) => {
-  //     if (selectedGroupId === groupId) {
-  //       // 같은 그룹 다시 클릭하면 접기
-  //       setSelectedGroupId(null);
-  //       setMembers([]);
-  //       return;
-  //     }
 
-  //     setSelectedGroupId(groupId);
-  //     setLoading(true);
-
-  //     try {
-  //       const response = await fetch(`/api/groups/${groupId}/members`);
-  //       if (!response.ok) throw new Error("Failed to fetch members");
-  //       const data = await response.json();
-  //       //setMembers(data.members); // 받아온 members 저장
-  //       alert("111");
-  //       setMembers([
-  //         { id: "user-1", nickname: "홍길동", avatarUrl: "/avatars/user1.png" },
-  //         { id: "user-2", nickname: "김철수", avatarUrl: "/avatars/user2.png" },
-  //         { id: "user-3", nickname: "이영희", avatarUrl: "/avatars/user3.png" },
-  //         { id: "user-4", nickname: "박지민", avatarUrl: "/avatars/user4.png" },
-  //         { id: "user-5", nickname: "최준석", avatarUrl: "/avatars/user5.png" },
-  //       ]);
-  //     } catch (error) {
-  //       console.error(error);
-  //       setMembers([]);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
   const handleApproveMember = (memberId: string) => {
     const approved = pendingMembers.find((m) => m.id === memberId);
     if (approved) {
@@ -142,6 +122,7 @@ export default function JoinedGroupOperating({
     }
   };
   const handleToggleClose = (groupId: string) => {
+    console.log(groupId);
     setGroupStatuses((prev) => ({
       ...prev,
       [groupId]: !prev[groupId],
@@ -159,7 +140,7 @@ export default function JoinedGroupOperating({
 
     setSelectedGroupId(groupId);
     setLoading(true);
-
+    console.log(groupId);
     // 그룹 변경할 때 이전 멤버 선택 상태 초기화
     setSelectedMemberId(null);
     setAttendanceRate(0);
@@ -199,14 +180,16 @@ export default function JoinedGroupOperating({
 
       {/* 카드 리스트 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {groups.map((group) => (
+        {ongoingGroup?.map((group) => (
           <OperatingGroupCard
             key={group.id}
             id={group.id}
-            name={group.name}
-            thumbnail={group.thumbnail}
-            memberCount={group.memberCount}
-            isClosed={groupStatuses[group.id] ?? group.isClosed} //  groupStatuses 먼저 보고, 없으면 group.isClosed
+            title={group.title}
+            thumbnail={group.thumbnailFileUrl || "/images/no-image.png"}
+            status={group.status}
+            currentMemberCount={group.currentMemberCount}
+            maxMemberCount={group.maxMemberCount}
+            //isClosed={groupStatuses[group.id] ?? group.isClosed} //  groupStatuses 먼저 보고, 없으면 group.isClosed
             onClick={() => handleCardClick(group.id)}
             onEdit={() => {
               alert("수정");
@@ -278,6 +261,23 @@ export default function JoinedGroupOperating({
           </div>
         </div>
       )}
+
+      <h2 className="text-2xl font-bold mb-6 mt-4">종료 된 스터디 그룹</h2>
+      {/* 카드 리스트 */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+        {endGroup?.map((group) => (
+          <EndGroupCard
+            key={group.id}
+            id={group.id}
+            title={group.title}
+            thumbnail={group.thumbnailFileUrl || "/images/no-image.png"}
+            isClosed={true}
+            currentMemberCount={group.currentMemberCount}
+            //isClosed={groupStatuses[group.id] ?? group.isClosed} //  groupStatuses 먼저 보고, 없으면 group.isClosed
+            onClick={() => handleCardClick(group.id)}
+          />
+        ))}
+      </div>
     </div>
   );
 }
