@@ -8,7 +8,7 @@ import koLocale from "@fullcalendar/core/locales/ko";
 import GroupList from "./GroupList";
 import JoinedGroupList from "./JoinedGroupList";
 import CalendarStyle from "./CalendarStyle";
-import { useMemo } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import RequestedGroupList from "./RequestedGroupList";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
@@ -94,6 +94,20 @@ const requestedGroups = [
 ];
 
 export default function GroupCalendarPage() {
+  const calendarRef = useRef<FullCalendar | null>(null);
+  const todayStr = new Date().toISOString().split("T")[0];
+  const [selectedDate, setSelectedDate] = useState<string | null>(todayStr);
+  // const [selectedDate, setSelectedDate] = useState<string | null>(() => {
+  // 초기값은 오늘 날짜
+  // return new Date().toISOString().split("T")[0];
+  // });
+
+  useEffect(() => {
+    if (calendarRef.current) {
+      (calendarRef.current?.getApi() as any).render();
+    }
+  }, [selectedDate]);
+
   const calendarEvents = useMemo(() => {
     return mockGroupEvents.map((g) => ({
       title: g.groupName,
@@ -122,6 +136,7 @@ export default function GroupCalendarPage() {
           <CalendarStyle />
           <div className="mb-12 bg-white dark:bg-zinc-900 rounded-xl shadow overflow-hidden p-4">
             <FullCalendar
+              ref={calendarRef}
               plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
               initialView="dayGridMonth"
               headerToolbar={{
@@ -148,6 +163,45 @@ export default function GroupCalendarPage() {
                   slotMaxTime: "24:00:00",
                 },
               }}
+              dateClick={(info) => {
+                const currentView = info.view.type;
+                const clickedDate = info.dateStr;
+                if (currentView === "dayGridMonth") {
+                  // 월별 뷰에서 클릭
+                  setSelectedDate(clickedDate);
+                }
+              }}
+              datesSet={(arg) => {
+                const todayStr = new Date().toISOString().split("T")[0];
+                const startStr = arg.start.toISOString().split("T")[0];
+                const endStr = arg.end.toISOString().split("T")[0];
+                if (startStr <= todayStr && todayStr <= endStr) {
+                  setSelectedDate(todayStr); // 오늘 버튼 눌렀을 때 처리
+                }
+              }}
+              dayCellClassNames={(arg) => {
+                const dateStr = arg.date.toLocaleDateString("sv-SE");
+                return selectedDate === dateStr ? ["selected-cell"] : [];
+              }}
+              // dayCellDidMount={(args) => {
+              //   const dateStr = args.date.toLocaleDateString("sv-SE");
+              //   const todayStr = new Date().toLocaleDateString("sv-SE");
+
+              //   const isDark =
+              //     document.documentElement.classList.contains("dark");
+
+              //   if (selectedDate === dateStr) {
+              //     args.el.style.backgroundColor = "#bae6fd";
+              //     const numberEl = args.el.querySelector(
+              //       ".fc-daygrid-day-number",
+              //     ) as HTMLElement;
+              //     if (numberEl) {
+              //       numberEl.style.color = isDark ? "#1e3a8a" : "#1e3a8a"; // 다크모드든 라이트모드든 진한 파랑
+              //     }
+              //   } else {
+              //     args.el.style.backgroundColor = "";
+              //   }
+              // }}
             />
           </div>
 

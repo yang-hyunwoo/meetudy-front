@@ -82,6 +82,21 @@ export default function CalendarStyle() {
         .fc-col-header-cell.fc-day-sun .fc-col-header-cell-cushion {
         color: #ef4444; /* 일요일 헤더 빨간색 */
         }
+
+.fc-daygrid-day.selected-date {
+  background-color: #bae6fd !important;
+}
+.fc-daygrid-day.selected-date .fc-daygrid-day-number {
+  color: #1e3a8a !important; /* 텍스트 진하게 */
+}
+
+.selected-cell {
+  background-color: #bae6fd !important;
+}
+
+.fc-theme-standard .fc-daygrid-day.selected-cell .fc-daygrid-day-number {
+  color: #1e3a8a !important;
+}
     `;
     document.head.appendChild(style);
     return () => {
