@@ -7,6 +7,7 @@ interface OperatingMemberCardProps {
   id: string;
   nickname: string;
   avatarUrl: string;
+  joinedAt: string; // 가입일
   onClick: () => void;
   onKick: () => void;
 }
@@ -15,6 +16,7 @@ export default function OperatingMemberCard({
   id,
   nickname,
   avatarUrl,
+  joinedAt,
   onClick,
   onKick,
 }: OperatingMemberCardProps) {
@@ -31,7 +33,12 @@ export default function OperatingMemberCard({
           height={40}
           className="rounded-full object-cover"
         />
-        <span className="text-sm">{nickname}</span>
+        <div className="flex flex-col">
+          <span className="text-sm font-medium">{nickname}</span>
+          <span className="text-xs text-muted-foreground">
+            가입일: {joinedAt}
+          </span>
+        </div>
       </div>
       <Button
         variant="destructive"

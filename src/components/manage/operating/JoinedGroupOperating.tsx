@@ -16,6 +16,7 @@ interface Member {
   memberId: string;
   nickname: string;
   thumbnailFileUrl: string;
+  joinApprovedAt: string;
 }
 
 interface JoinedGroup {
@@ -34,18 +35,22 @@ interface JoinedGroupOperatingProps {
   errorMessage?: string;
 }
 
+interface AttendanceList {
+  attendanceDate: string;
+  status: "PRESENT" | "LATE" | "ABSENT";
+}
+
 export default function JoinedGroupOperating({
   ongoingGroup,
   endGroup,
   errorMessage,
 }: JoinedGroupOperatingProps) {
-  console.log(ongoingGroup);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [attendanceRate, setAttendanceRate] = useState<number>(0);
-  const [attendanceDates, setAttendanceDates] = useState<string[]>([]);
+  const [attendanceDates, setAttendanceDates] = useState<AttendanceList[]>([]);
   const [pendingMembers, setPendingMembers] = useState<Member[]>([]);
   const [ongoingGroupState, setOngoingGroupState] = useState<JoinedGroup[]>(
     ongoingGroup || [],
@@ -62,35 +67,6 @@ export default function JoinedGroupOperating({
     }
   }, [errorMessage, router]);
 
-  const attendanceData: Record<string, { rate: number; dates: string[] }> = {
-    "user-1": {
-      rate: 92,
-      dates: ["2025-04-01", "2025-04-02", "2025-04-03"],
-    },
-    "user-2": {
-      rate: 78,
-      dates: ["2025-04-01", "2025-04-04", "2025-04-07"],
-    },
-    "user-3": {
-      rate: 85,
-      dates: ["2025-04-02", "2025-04-05", "2025-04-06"],
-    },
-    "user-4": {
-      rate: 60,
-      dates: ["2025-04-01", "2025-04-08"],
-    },
-    "user-5": {
-      rate: 100,
-      dates: [
-        "2025-04-01",
-        "2025-04-02",
-        "2025-04-03",
-        "2025-04-04",
-        "2025-04-05",
-      ],
-    },
-  };
-
   //승인
   const handleApproveMember = async (memberId: string, id: string) => {
     const approved = pendingMembers.find((m) => m.id === id);
@@ -98,9 +74,6 @@ export default function JoinedGroupOperating({
       alert("스터디 그룹이 선택되지 않았습니다.");
       return;
     }
-    console.log(memberId);
-    console.log(id);
-    console.log(approved);
     if (approved) {
       if (confirm("승인 하시겠습니까?")) {
         try {
@@ -160,6 +133,7 @@ export default function JoinedGroupOperating({
     }
   };
 
+  //강퇴
   const handleKickMember = async (memberId: string, id: string) => {
     if (confirm("정말 이 멤버를 강퇴하시겠습니까?")) {
       try {
@@ -200,7 +174,9 @@ export default function JoinedGroupOperating({
     }
   };
 
-  const handleMemberClick = (memberId: string) => {
+  const handleMemberClick = async (memberId: string) => {
+    console.log(memberId);
+    console.log(selectedGroupId);
     if (selectedMemberId === memberId) {
       setSelectedMemberId(null);
       setAttendanceRate(0);
@@ -209,16 +185,28 @@ export default function JoinedGroupOperating({
     }
 
     setSelectedMemberId(memberId);
+    const params: any = {
+      studyGroupId: selectedGroupId,
+      memberId: memberId,
+    };
 
-    const data = attendanceData[memberId];
-    if (data) {
-      setAttendanceRate(data.rate);
-      setAttendanceDates(data.dates);
-    } else {
-      // 해당 멤버 출석 데이터 없으면 초기화
-      setAttendanceRate(0);
-      setAttendanceDates([]);
-    }
+    try {
+      const res = await api.get(
+        "/private/study-group/operate/attendance/rate",
+        {
+          params,
+        },
+      );
+      if (res.data.httpCode === 200) {
+        if (res.data.data.attendanceList.size == 0) {
+          setAttendanceRate(0);
+          setAttendanceDates([]);
+        } else {
+          setAttendanceRate(res.data.data.rate);
+          setAttendanceDates(res.data.data.attendanceList);
+        }
+      }
+    } catch (error) {}
   };
 
   //모집 재개/종료 버튼
@@ -236,7 +224,6 @@ export default function JoinedGroupOperating({
         const res = await api.put(
           `/private/study-group/operate/${groupId}/status`,
         );
-        console.log(res);
         if (res.data.httpCode == 200) {
           setOngoingGroupState((prev) =>
             prev.map((group) =>
@@ -314,6 +301,19 @@ export default function JoinedGroupOperating({
     }
   };
 
+  const getStatusLabel = (status: "PRESENT" | "LATE" | "ABSENT") => {
+    switch (status) {
+      case "PRESENT":
+        return "출석";
+      case "LATE":
+        return "지각";
+      case "ABSENT":
+        return "결석";
+      default:
+        return "";
+    }
+  };
+
   return (
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-6">운영 중인 스터디 그룹</h2>
@@ -332,7 +332,7 @@ export default function JoinedGroupOperating({
               maxMemberCount={group.maxMemberCount}
               onClick={() => handleCardClick(group.id)}
               onEdit={() => {
-                alert("수정");
+                router.push(`/study/group/edit/${group.id}`);
               }}
               onDelete={() => {
                 handleDelete(group.id);
@@ -364,6 +364,11 @@ export default function JoinedGroupOperating({
                   id={member.id}
                   nickname={member.nickname}
                   avatarUrl={member.thumbnailFileUrl || "/images/no-image.png"}
+                  joinedAt={
+                    member.joinApprovedAt
+                      ? dayjs(member.joinApprovedAt).format("YYYY-MM-DD")
+                      : "-"
+                  }
                   onClick={() => handleMemberClick(member.memberId)}
                   onKick={() => handleKickMember(member.memberId, member.id)}
                 />
@@ -377,13 +382,17 @@ export default function JoinedGroupOperating({
           <AttendanceDonutChart rate={attendanceRate} />
           <div className="w-full max-w-md">
             <h4 className="text-lg font-bold mb-2">출석한 날짜</h4>
-            <ul className="list-disc list-inside">
-              {attendanceDates.map((date) => (
-                <li key={date} className="text-sm">
-                  {date}
-                </li>
-              ))}
-            </ul>
+            {attendanceDates.length === 0 ? (
+              <p className="text-sm text-gray-500">출석 기록이 없습니다.</p>
+            ) : (
+              <ul className="list-disc list-inside">
+                {attendanceDates.map((date) => (
+                  <li key={date.attendanceDate} className="text-sm">
+                    {date.attendanceDate} / [{getStatusLabel(date.status)}]
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       )}
