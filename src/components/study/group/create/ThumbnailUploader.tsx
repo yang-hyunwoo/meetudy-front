@@ -5,6 +5,7 @@ import { ImageIcon, X } from "lucide-react";
 interface ThumbnailUploaderProps {
   thumbnail: File | null;
   thumbnailPreview: string | null;
+  originFileName?: string;
   onChange: (file: File | null) => void;
   onRemove: () => void;
 }
@@ -12,6 +13,7 @@ interface ThumbnailUploaderProps {
 export default function ThumbnailUploader({
   thumbnail,
   thumbnailPreview,
+  originFileName,
   onChange,
   onRemove,
 }: ThumbnailUploaderProps) {
@@ -37,9 +39,23 @@ export default function ThumbnailUploader({
             className="hidden"
           />
         </label>
+
         {thumbnail && (
           <div className="flex items-center gap-2">
             <span className="text-sm">{thumbnail.name}</span>
+            <button
+              type="button"
+              onClick={onRemove}
+              className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+            >
+              <X className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+            </button>
+          </div>
+        )}
+
+        {!thumbnail && thumbnailPreview && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm">{originFileName}</span>
             <button
               type="button"
               onClick={onRemove}

@@ -30,6 +30,7 @@ interface GroupFormProps {
     summary: string;
     region: string;
     maxMemberCount: number;
+    currentMemberCount: number;
     joinType: boolean;
     secret: boolean;
     secretPassword?: string;
@@ -44,13 +45,21 @@ interface GroupFormProps {
     meetingStartTime: string;
     meetingEndTime: string;
     tag: string;
+    fileDetailId?: string;
+    fileId?: string;
+    studygGroupDetailId?: string;
+    thumbnailFileUrl?: string;
+    studyGroupId?: string;
+    originFileName?: string;
   };
   onSubmit?: (values: any) => void;
+  errorMessage?: string;
 }
 
 export default function GroupCreatePage({
   defaultValues,
   onSubmit,
+  errorMessage,
 }: GroupFormProps) {
   const TITLE_NOT_NULL = "스터디 그룹 명은 공백일 수 없습니다.";
   const REGION_NOT_NULL = "스터디 그룹 지역을 선택 해주세요.";
@@ -88,7 +97,7 @@ export default function GroupCreatePage({
   const [summary, setSummary] = useState(defaultValues?.summary || "");
 
   const [region, setRegion] = useState(defaultValues?.region || "");
-  const [regionError, setRegionError] = useState(defaultValues?.region || "");
+  const [regionError, setRegionError] = useState("");
   const [regionTouched, setRegionTouched] = useState(false);
 
   const [maxMemberCount, setMaxMemberCount] = useState<number | undefined>(
@@ -125,12 +134,22 @@ export default function GroupCreatePage({
   );
 
   const [meetingDay, setMeetingDay] = useState<string[]>(
-    defaultValues?.meetingDay || [],
+    typeof defaultValues?.meetingDay === "string"
+      ? (defaultValues.meetingDay as string).split(",").map((d) => d.trim())
+      : (defaultValues?.meetingDay as string[]) || [],
   );
   const [meetingDayError, setMeetingDayError] = useState("");
 
   const [thumbnail, setThumbnail] = useState<File | null>(null);
-  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
+    defaultValues?.thumbnailFileUrl ?? null,
+  );
+  const [thumbnailFileId, setThumbnailFileId] = useState<string | undefined>(
+    defaultValues?.fileId ?? undefined,
+  );
+  const [hasThumbnail, setHasThumbnail] = useState<boolean>(
+    !!defaultValues?.fileId,
+  );
 
   const [startHour, setStartHour] = useState(
     defaultValues?.meetingStartTime?.split(":")[0] || "",
@@ -151,12 +170,12 @@ export default function GroupCreatePage({
   const [endTimeError, setEndTimeError] = useState(false);
 
   const [startDate, setStartDate] = useState<Date | undefined>(
-    defaultValues?.startDate,
+    defaultValues?.startDate ? new Date(defaultValues.startDate) : undefined,
   );
   const [startDateError, setStartDateError] = useState(false);
 
   const [endDate, setEndDate] = useState<Date | undefined>(
-    defaultValues?.endDate,
+    defaultValues?.endDate ? new Date(defaultValues.endDate) : undefined,
   );
   const [endDateError, setEndDateError] = useState(false);
 
@@ -169,6 +188,13 @@ export default function GroupCreatePage({
       setTitleError("");
     }
   };
+
+  useEffect(() => {
+    if (errorMessage) {
+      alert(errorMessage);
+      router.back(); // 이전 페이지로 이동
+    }
+  }, [errorMessage, router]);
 
   useEffect(() => {
     if (meetingDay.length != 0) {
@@ -369,6 +395,8 @@ export default function GroupCreatePage({
       meetingStartTime: `${startHour}:${startMinute}`,
       meetingEndTime: `${endHour}:${endMinute}`,
       thumbnailFileId: thumbnail,
+      fileId: defaultValues?.fileId,
+      studyGroupId: defaultValues?.studyGroupId,
       tag: tag.join(","),
     };
     const fieldChecks: FieldValidation[] = [
@@ -415,23 +443,52 @@ export default function GroupCreatePage({
         setSecretPasswordError("");
       }
     }
+    if (
+      defaultValues?.currentMemberCount !== undefined &&
+      maxMemberCount !== undefined &&
+      defaultValues.currentMemberCount > maxMemberCount
+    ) {
+      setMaxMemberCountError("현재 인원수 보다 작을 수 없습니다.");
+      return;
+    }
     setIsLoading(true);
     try {
       const formData = new FormData();
+      const deleteFormData = new FormData();
+
+      console.log(defaultValues?.fileId);
+
+      if (!hasThumbnail && defaultValues?.fileDetailId) {
+        if (defaultValues?.fileId) {
+          deleteFormData.append("fileId", defaultValues.fileId);
+        }
+        deleteFormData.append("delFileDetailsId", defaultValues.fileDetailId);
+        const deleteRes = await api.put("/private/file-delete", deleteFormData);
+      }
+
       if (thumbnail) {
         formData.append("files", thumbnail);
+        if (defaultValues?.fileId) {
+          formData.append("fileId", defaultValues.fileId);
+        }
+
         const uploadRes = await api.post("/private/file-upload", formData);
         const uploadedFileId = uploadRes.data.data?.fileId;
         if (uploadedFileId) {
           values.thumbnailFileId = uploadedFileId;
         }
       }
-
-      const res = await api.post("/private/study-group/insert", values);
-
-      router.push("/study/list/" + region.toLowerCase());
+      if (defaultValues?.studyGroupId) {
+        const res = await api.put(
+          "/private/study-group/operate/update",
+          values,
+        );
+        router.push("/group/manage/operating");
+      } else {
+        const res = await api.post("/private/study-group/insert", values);
+        router.push("/study/list/" + region.toLowerCase());
+      }
     } catch (error) {
-      console.log(error);
       if (axios.isAxiosError(error)) {
         if (error.response?.data.errCode == "ERR_017") {
           setTimeValidError(error.response?.data.errCodeMsg);
@@ -500,6 +557,7 @@ export default function GroupCreatePage({
         {/* 썸네일 업로드 */}
         <ThumbnailUploader
           thumbnail={thumbnail}
+          originFileName={defaultValues?.originFileName}
           thumbnailPreview={thumbnailPreview}
           onChange={(file) => {
             setThumbnail(file);
@@ -515,6 +573,7 @@ export default function GroupCreatePage({
           onRemove={() => {
             setThumbnail(null);
             setThumbnailPreview(null);
+            setHasThumbnail(false);
           }}
         />
 
@@ -614,6 +673,7 @@ export default function GroupCreatePage({
         )}
         {/* 시작일 */}
         {/* 시작일 + 종료일 */}
+
         <StudyPeriodSelector
           startDate={startDate}
           endDate={endDate}
@@ -622,6 +682,11 @@ export default function GroupCreatePage({
           showStartError={startDateError}
           showEndError={endDateError}
         />
+        {defaultValues?.studyGroupId && (
+          <p className="text-xs text-red-500 mt-3">
+            ※ 이미 시작된 스터디 그룹은 기간을 변경할 수 없습니다.
+          </p>
+        )}
         {dateValidError && (
           <p className="text-xs text-red-500 mt-3">{dateValidError}</p>
         )}
@@ -753,7 +818,13 @@ export default function GroupCreatePage({
             disabled={isLoading}
           >
             {isLoading && <Spinner />}
-            {isLoading ? "그룹 생성중..." : "그룹 생성"}
+            {isLoading
+              ? defaultValues?.studyGroupId
+                ? "그룹 수정 중..."
+                : "그룹 생성 중..."
+              : defaultValues?.studyGroupId
+                ? "그룹 수정"
+                : "그룹 생성"}
           </Button>
         </div>
       </form>
