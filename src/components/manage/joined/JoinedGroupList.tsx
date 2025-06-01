@@ -12,11 +12,14 @@ interface Member {
 }
 
 interface JoinedGroup {
+  currentMemberCount: number;
+  maxMemberCount: number;
   id: string;
-  name: string;
-  thumbnail: string;
-  memberCount: number;
-  description: string;
+  regionEnum: string;
+  status: string;
+  thumbnailFileUrl?: string;
+  title: string;
+  summary: string;
 }
 
 interface JoinedGroupListProps {
@@ -95,13 +98,15 @@ export default function JoinedGroupList({ groups }: JoinedGroupListProps) {
           {/* 그룹 카드 */}
           <JoinedGroupCard
             id={group.id}
-            name={group.name}
-            thumbnail={group.thumbnail}
-            memberCount={group.memberCount}
-            description={group.description}
+            title={group.title}
+            thumbnailFileUrl={group.thumbnailFileUrl ?? ""}
+            currentMemberCount={group.currentMemberCount}
+            summary={group.summary}
             onClick={() => setOpenAttendanceGroupId(group.id)} //  그룹 카드 클릭 시 출석률 다이얼로그 열기
             onClickMembers={() => setOpenMembersGroupId(group.id)}
-            onClickWithdraw={() => console.log(`${group.name} 탈퇴하기 클릭됨`)}
+            onClickWithdraw={() =>
+              console.log(`${group.title} 탈퇴하기 클릭됨`)
+            }
           />
 
           {/* 출석률 다이얼로그 */}
@@ -110,7 +115,7 @@ export default function JoinedGroupList({ groups }: JoinedGroupListProps) {
             onOpenChange={(open) =>
               setOpenAttendanceGroupId(open ? group.id : null)
             }
-            groupName={group.name}
+            groupName={group.title}
             attendanceRate={myAttendanceRate}
             attendanceTimes={attendanceTimes}
           />
@@ -121,7 +126,7 @@ export default function JoinedGroupList({ groups }: JoinedGroupListProps) {
             onOpenChange={(open) =>
               setOpenMembersGroupId(open ? group.id : null)
             }
-            groupName={group.name}
+            groupName={group.title}
             members={members}
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}

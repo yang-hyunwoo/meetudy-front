@@ -29,22 +29,16 @@ interface monthList {
   endMeeting?: string;
 }
 
-const joinedGroups = [
-  {
-    id: "g1",
-    name: "리액트 스터디",
-    thumbnail: "/thumb/react.png",
-    memberCount: 15,
-    description: "리액트를 공부하는 스터디입니다.",
-  },
-  {
-    id: "g2",
-    name: "자료구조 스터디",
-    thumbnail: "/thumb/data.png",
-    memberCount: 20,
-    description: "자료구조를 깊게 공부하는 모임입니다.",
-  },
-];
+interface JoinedGroup {
+  currentMemberCount: number;
+  maxMemberCount: number;
+  id: string;
+  regionEnum: string;
+  status: string;
+  thumbnailFileUrl?: string;
+  title: string;
+  summary: string;
+}
 
 const requestedGroups = [
   {
@@ -70,15 +64,27 @@ export default function GroupCalendarPage() {
   const calendarRef = useRef<FullCalendar | null>(null);
   const todayStr = new Date().toISOString().split("T")[0];
   const [selectedDate, setSelectedDate] = useState<string | null>(todayStr);
-  // const [selectedDate, setSelectedDate] = useState<string | null>(() => {
-  // 초기값은 오늘 날짜
-  // return new Date().toISOString().split("T")[0];
-  // });
+  const [ongoingGroup, setOngoingGroup] = useState<JoinedGroup[]>([]);
+  const [endGroup, setEndGroup] = useState<JoinedGroup[]>([]);
   useEffect(() => {
     if (calendarRef.current) {
       (calendarRef.current?.getApi() as any).render();
     }
   }, [selectedDate]);
+
+  useEffect(() => {
+    groupList();
+  }, []);
+
+  const groupList = async () => {
+    const res = await api.get("/private/study-group/operate/list");
+    if (res.data.httpCode === 200) {
+      console.log(res.data.data);
+      setOngoingGroup(res.data.data.ongoingGroup);
+    } else {
+      setOngoingGroup([]);
+    }
+  };
 
   useEffect(() => {
     if (currentMonth != "") {
@@ -253,7 +259,7 @@ export default function GroupCalendarPage() {
         {/* 참여 중인 그룹 목록 탭 */}
         <TabsContent value="groups">
           <h2 className="text-xl font-bold mb-4">✨ 참여 중인 그룹 목록</h2>
-          <JoinedGroupList groups={joinedGroups} />
+          <JoinedGroupList groups={ongoingGroup} />
         </TabsContent>
 
         {/* 승인 요청 그룹 목록 탭 */}

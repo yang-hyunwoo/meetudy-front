@@ -5,20 +5,20 @@ import { Button } from "@/components/ui/button";
 
 interface JoinedGroupCardProps {
   id: string;
-  name: string;
-  thumbnail: string;
-  memberCount: number;
-  description: string;
+  title: string;
+  thumbnailFileUrl: string;
+  currentMemberCount: number;
+  summary: string;
   onClickMembers: () => void;
   onClickWithdraw: () => void;
   onClick?: () => void; //
 }
 export default function JoinedGroupCard({
   id,
-  name,
-  thumbnail,
-  memberCount,
-  description,
+  title,
+  thumbnailFileUrl,
+  currentMemberCount,
+  summary,
   onClickMembers,
   onClickWithdraw,
   onClick,
@@ -31,8 +31,8 @@ export default function JoinedGroupCard({
       {/* 썸네일 */}
       <div className="flex-shrink-0">
         <Image
-          src={thumbnail || "/default-thumbnail.png"}
-          alt={name}
+          src={thumbnailFileUrl || "/default-thumbnail.png"}
+          alt={title}
           width={80}
           height={80}
           className="rounded-lg object-cover w-20 h-20 bg-gray-200 dark:bg-zinc-700"
@@ -42,13 +42,13 @@ export default function JoinedGroupCard({
       {/* 그룹 설명 */}
       <div className="flex-1 min-w-0">
         <div className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
-          {name}
+          {title}
         </div>
         <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-          {memberCount}명 참여 중
+          {currentMemberCount}명 참여 중
         </div>
         <div className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
-          {description}
+          {summary}
         </div>
       </div>
 
