@@ -5,59 +5,29 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import koLocale from "@fullcalendar/core/locales/ko";
-import GroupList from "./GroupList";
 import JoinedGroupList from "./JoinedGroupList";
 import CalendarStyle from "./CalendarStyle";
 import { useMemo, useState, useRef, useEffect } from "react";
 import RequestedGroupList from "./RequestedGroupList";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { api } from "@/lib/axios";
+import GroupList from "./GroupList";
 
-interface GroupEvent {
+interface DayList {
   groupId: string;
   groupName: string;
   groupImageUrl: string;
   nextMeeting: string;
-  status: {
-    attended: boolean;
-    missionSubmitted: boolean;
-  };
+  attended?: string;
   endMeeting?: string;
 }
 
-const mockGroupEvents: GroupEvent[] = [
-  {
-    groupId: "g1",
-    groupName: "리액트 스터디",
-    groupImageUrl: "/thumb/react.png",
-    nextMeeting: "2025-04-30T19:00:00",
-    endMeeting: "2025-04-30T21:00:00",
-    status: { attended: true, missionSubmitted: false },
-  },
-  {
-    groupId: "g3",
-    groupName: "리액트 스터디",
-    groupImageUrl: "/thumb/react.png",
-    nextMeeting: "2025-04-23T19:00:00",
-    endMeeting: "2025-04-23T21:00:00",
-    status: { attended: true, missionSubmitted: false },
-  },
-  {
-    groupId: "g4",
-    groupName: "리액트 스터디",
-    groupImageUrl: "/thumb/react.png",
-    nextMeeting: "2025-04-26T21:00:00",
-    endMeeting: "2025-04-26T22:00:00",
-    status: { attended: true, missionSubmitted: false },
-  },
-  {
-    groupId: "g2",
-    groupName: "자료구조 스터디",
-    groupImageUrl: "/thumb/data.png",
-    nextMeeting: "2025-05-01T20:00:00",
-    endMeeting: "2025-05-01T22:00:00",
-    status: { attended: false, missionSubmitted: true },
-  },
-];
+interface monthList {
+  groupId: string;
+  groupName: string;
+  nextMeeting: string;
+  endMeeting?: string;
+}
 
 const joinedGroups = [
   {
@@ -94,6 +64,9 @@ const requestedGroups = [
 ];
 
 export default function GroupCalendarPage() {
+  const [monthLists, setMonthLists] = useState<monthList[]>([]);
+  const [dayLists, setDayLists] = useState<DayList[]>([]);
+  const [currentMonth, setCurrentMonth] = useState<string>("");
   const calendarRef = useRef<FullCalendar | null>(null);
   const todayStr = new Date().toISOString().split("T")[0];
   const [selectedDate, setSelectedDate] = useState<string | null>(todayStr);
@@ -101,15 +74,73 @@ export default function GroupCalendarPage() {
   // 초기값은 오늘 날짜
   // return new Date().toISOString().split("T")[0];
   // });
-
   useEffect(() => {
     if (calendarRef.current) {
       (calendarRef.current?.getApi() as any).render();
     }
   }, [selectedDate]);
 
+  useEffect(() => {
+    if (currentMonth != "") {
+      monthList();
+    }
+  }, [currentMonth]);
+
+  useEffect(() => {
+    if (selectedDate != null) {
+      dayList();
+    }
+  }, [selectedDate]);
+
+  const monthList = async () => {
+    const params: any = {
+      scheduleDate: currentMonth,
+    };
+
+    const res = await api.get("/private/study-group/join/month/list", {
+      params,
+    });
+    if (res.data.httpCode === 200) {
+      setMonthLists(res.data.data);
+    } else {
+      setMonthLists([]);
+    }
+  };
+  const dayList = async () => {
+    const params: any = {
+      scheduleDate: selectedDate,
+    };
+    const res = await api.get("/private/study-group/join/day/list", {
+      params,
+    });
+    if (res.data.httpCode === 200) {
+      setDayLists(res.data.data);
+    } else {
+      setDayLists([]);
+    }
+  };
+
+  const weekList = async (startDate: any, endDate: any) => {
+    const params: any = {
+      startDate: startDate,
+      endDate: endDate,
+    };
+    const res = await api.get("/private/study-group/join/week/list", {
+      params,
+    });
+    if (res.data.httpCode === 200) {
+      setDayLists(res.data.data);
+    } else {
+      setDayLists([]);
+    }
+  };
+
+  const fetchWeekList = (startDate: any, endDate: any) => {
+    weekList(startDate, endDate);
+  };
+
   const calendarEvents = useMemo(() => {
-    return mockGroupEvents.map((g) => ({
+    return monthLists.map((g) => ({
       title: g.groupName,
       start: g.nextMeeting,
       end: g.endMeeting,
@@ -117,7 +148,7 @@ export default function GroupCalendarPage() {
       display: "auto",
       titleAttr: g.groupName,
     }));
-  }, []);
+  }, [monthLists]);
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-4">
@@ -165,48 +196,58 @@ export default function GroupCalendarPage() {
               }}
               dateClick={(info) => {
                 const currentView = info.view.type;
-                const clickedDate = info.dateStr;
+                const clickedDate = info.dateStr.split("T")[0];
                 if (currentView === "dayGridMonth") {
-                  // 월별 뷰에서 클릭
                   setSelectedDate(clickedDate);
                 }
               }}
               datesSet={(arg) => {
-                const todayStr = new Date().toISOString().split("T")[0];
-                const startStr = arg.start.toISOString().split("T")[0];
-                const endStr = arg.end.toISOString().split("T")[0];
-                if (startStr <= todayStr && todayStr <= endStr) {
-                  setSelectedDate(todayStr); // 오늘 버튼 눌렀을 때 처리
+                const viewType = arg.view.type;
+
+                const year = arg.view.currentStart.getFullYear();
+                const month = (arg.view.currentStart.getMonth() + 1)
+                  .toString()
+                  .padStart(2, "0");
+                const monthZeroBased = arg.view.currentStart.getMonth();
+                const formattedMonth = `${year}-${month}`;
+                setCurrentMonth(formattedMonth);
+                if (viewType === "dayGridMonth") {
+                  // 해당 월의 1일로 selectedDate 설정
+                  const firstDate = new Date(year, monthZeroBased, 1); // 1일
+                  const firstDateStr = firstDate.toLocaleDateString("sv-SE"); // yyyy-mm-dd
+
+                  const todayStr = new Date().toISOString().split("T")[0];
+                  const startStr = arg.start.toISOString().split("T")[0];
+                  const endStr = arg.end.toISOString().split("T")[0];
+                  if (startStr <= todayStr && todayStr <= endStr) {
+                    setSelectedDate(todayStr); // 오늘 버튼 눌렀을 때 처리
+                  } else {
+                    setSelectedDate(firstDateStr);
+                  }
+                }
+
+                if (viewType === "timeGridWeek") {
+                  const startStr = arg.start.toLocaleDateString("sv-SE");
+                  const endDate = new Date(arg.end);
+                  endDate.setDate(endDate.getDate() - 1); // 하루 빼기
+                  const endStr = endDate.toLocaleDateString("sv-SE");
+                  fetchWeekList(startStr, endStr);
                 }
               }}
               dayCellClassNames={(arg) => {
                 const dateStr = arg.date.toLocaleDateString("sv-SE");
-                return selectedDate === dateStr ? ["selected-cell"] : [];
+                const viewType = calendarRef.current?.getApi().view.type;
+
+                if (viewType === "dayGridMonth" && selectedDate === dateStr) {
+                  return ["selected-cell"];
+                }
+                return [];
               }}
-              // dayCellDidMount={(args) => {
-              //   const dateStr = args.date.toLocaleDateString("sv-SE");
-              //   const todayStr = new Date().toLocaleDateString("sv-SE");
-
-              //   const isDark =
-              //     document.documentElement.classList.contains("dark");
-
-              //   if (selectedDate === dateStr) {
-              //     args.el.style.backgroundColor = "#bae6fd";
-              //     const numberEl = args.el.querySelector(
-              //       ".fc-daygrid-day-number",
-              //     ) as HTMLElement;
-              //     if (numberEl) {
-              //       numberEl.style.color = isDark ? "#1e3a8a" : "#1e3a8a"; // 다크모드든 라이트모드든 진한 파랑
-              //     }
-              //   } else {
-              //     args.el.style.backgroundColor = "";
-              //   }
-              // }}
             />
           </div>
 
           {/* 그룹별 입장 리스트 */}
-          <GroupList groups={mockGroupEvents} />
+          <GroupList groups={dayLists} />
         </TabsContent>
 
         {/* 참여 중인 그룹 목록 탭 */}
