@@ -348,7 +348,13 @@ export default function JoinedGroupOperating({
       {/* 선택된 그룹 인원 리스트 */}
       {selectedGroupId && (
         <div className="mt-10">
-          <h3 className="text-xl font-bold mb-4">멤버 목록</h3>
+          <h3 className="text-xl font-bold mb-4">
+            {
+              ongoingGroupState.find((group) => group.id === selectedGroupId)
+                ?.title
+            }{" "}
+            멤버 목록
+          </h3>
 
           {loading ? (
             <p>멤버 정보를 불러오는 중입니다...</p>
