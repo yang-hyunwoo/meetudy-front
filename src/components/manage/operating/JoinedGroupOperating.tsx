@@ -175,8 +175,6 @@ export default function JoinedGroupOperating({
   };
 
   const handleMemberClick = async (memberId: string) => {
-    console.log(memberId);
-    console.log(selectedGroupId);
     if (selectedMemberId === memberId) {
       setSelectedMemberId(null);
       setAttendanceRate(0);

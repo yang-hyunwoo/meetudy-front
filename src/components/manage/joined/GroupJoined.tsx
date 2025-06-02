@@ -12,6 +12,7 @@ import RequestedGroupList from "./RequestedGroupList";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { api } from "@/lib/axios";
 import GroupList from "./GroupList";
+import { useAuthContext } from "@/context/AuthContext";
 
 interface DayList {
   groupId: string;
@@ -40,22 +41,12 @@ interface JoinedGroup {
   summary: string;
 }
 
-const requestedGroups = [
-  {
-    id: "r1",
-    name: "알고리즘 스터디",
-    thumbnail: "/thumb/algorithm.png",
-    memberCount: 8,
-    description: "알고리즘 문제를 함께 풉니다.",
-  },
-  {
-    id: "r2",
-    name: "CS 전공 스터디",
-    thumbnail: "/thumb/cs.png",
-    memberCount: 10,
-    description: "전산학 전공 과목을 공부합니다.",
-  },
-];
+interface RequestGroup {
+  id: string;
+  title: string;
+  thumbnailFileUrl: string;
+  summary: string;
+}
 
 export default function GroupCalendarPage() {
   const [monthLists, setMonthLists] = useState<monthList[]>([]);
@@ -65,7 +56,9 @@ export default function GroupCalendarPage() {
   const todayStr = new Date().toISOString().split("T")[0];
   const [selectedDate, setSelectedDate] = useState<string | null>(todayStr);
   const [ongoingGroup, setOngoingGroup] = useState<JoinedGroup[]>([]);
+  const [requestGroup, setRequestGroup] = useState<RequestGroup[]>([]);
   const [endGroup, setEndGroup] = useState<JoinedGroup[]>([]);
+  const { isLoggedIn } = useAuthContext();
   useEffect(() => {
     if (calendarRef.current) {
       (calendarRef.current?.getApi() as any).render();
@@ -74,12 +67,21 @@ export default function GroupCalendarPage() {
 
   useEffect(() => {
     groupList();
+    pendingList();
   }, []);
 
-  const groupList = async () => {
-    const res = await api.get("/private/study-group/operate/list");
+  const pendingList = async () => {
+    const res = await api.get("/private/study-group/join/pending/list");
     if (res.data.httpCode === 200) {
-      console.log(res.data.data);
+      setRequestGroup(res.data.data);
+    } else {
+      setRequestGroup([]);
+    }
+  };
+
+  const groupList = async () => {
+    const res = await api.get("/private/study-group/join/list");
+    if (res.data.httpCode === 200) {
       setOngoingGroup(res.data.data.ongoingGroup);
     } else {
       setOngoingGroup([]);
@@ -102,7 +104,6 @@ export default function GroupCalendarPage() {
     const params: any = {
       scheduleDate: currentMonth,
     };
-
     const res = await api.get("/private/study-group/join/month/list", {
       params,
     });
@@ -112,6 +113,7 @@ export default function GroupCalendarPage() {
       setMonthLists([]);
     }
   };
+
   const dayList = async () => {
     const params: any = {
       scheduleDate: selectedDate,
@@ -155,6 +157,36 @@ export default function GroupCalendarPage() {
       titleAttr: g.groupName,
     }));
   }, [monthLists]);
+
+  const cancelGroup = (id: string) => {
+    if (!isLoggedIn) {
+      alert("로그인 후 가능 합니다.");
+      return;
+    }
+    if (confirm("요청을 취소하시겠습니까?")) {
+      cancelAxios(id);
+    }
+  };
+
+  const cancelAxios = async (id: string) => {
+    try {
+      const StudyGroupCancelReqDto = {
+        studyGroupId: id,
+      };
+
+      const res = await api.put(
+        "/private/study-group/cancel",
+        StudyGroupCancelReqDto,
+      );
+      if (res.data.httpCode === 200) {
+        setRequestGroup((prevList) =>
+          prevList.filter((group) => String(group.id) !== String(id)),
+        );
+      }
+    } catch (error) {
+      alert("잠시 후 다시 시도해주세요.");
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-4">
@@ -266,9 +298,9 @@ export default function GroupCalendarPage() {
         <TabsContent value="requests">
           <h2 className="text-xl font-bold mb-4">🚀 승인 요청한 그룹 목록</h2>
           <RequestedGroupList
-            groups={requestedGroups}
+            groups={requestGroup}
             onCancelRequest={(id) => {
-              console.log("요청 취소 클릭:", id);
+              cancelGroup(id);
               // 여기서 요청 취소 API 호출하거나, 상태 업데이트 하면 됩니다
             }}
           />

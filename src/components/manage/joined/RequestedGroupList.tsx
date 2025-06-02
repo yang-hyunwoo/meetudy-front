@@ -3,16 +3,15 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
-interface RequestedGroup {
+interface RequestGroup {
   id: string;
-  name: string;
-  thumbnail: string;
-  memberCount: number;
-  description: string;
+  title: string;
+  thumbnailFileUrl: string;
+  summary: string;
 }
 
 interface RequestedGroupListProps {
-  groups: RequestedGroup[];
+  groups: RequestGroup[];
   onCancelRequest?: (id: string) => void;
 }
 
@@ -29,16 +28,16 @@ export default function RequestedGroupList({
         >
           <div className="flex items-center gap-4">
             <Image
-              src={group.thumbnail || "/default-thumbnail.png"}
-              alt={group.name}
+              src={group.thumbnailFileUrl || "/images/no-image.png"}
+              alt={group.title}
               width={80}
               height={80}
               className="rounded-lg object-cover w-20 h-20 bg-gray-200 dark:bg-zinc-700"
             />
             <div>
-              <h3 className="text-lg font-semibold">{group.name}</h3>
+              <h3 className="text-lg font-semibold">{group.title}</h3>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                {group.description}
+                {group.summary}
               </p>
             </div>
           </div>
