@@ -10,9 +10,9 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 
 interface Member {
-  id: string;
+  memberId: string;
   nickname: string;
-  avatarUrl: string;
+  thumbnailFileUrl?: string;
 }
 
 interface MembersDialogProps {
@@ -52,14 +52,24 @@ export default function MembersDialog({
               member.nickname.toLowerCase().includes(searchTerm.toLowerCase()),
             )
             .map((member) => (
-              <div key={member.id} className="flex items-center gap-3">
-                <Image
-                  src={member.avatarUrl}
-                  alt={member.nickname}
-                  width={32}
-                  height={32}
-                  className="rounded-full object-cover"
-                />
+              <div key={member.memberId} className="flex items-center gap-3">
+                {member.thumbnailFileUrl ? (
+                  <Image
+                    src={member.thumbnailFileUrl}
+                    alt={member.nickname}
+                    width={32}
+                    height={32}
+                    className="rounded-full object-cover"
+                  />
+                ) : (
+                  <Image
+                    src="/images/no-image.png"
+                    alt="기본 썸네일"
+                    width={32}
+                    height={32}
+                    className="rounded-full object-cover"
+                  />
+                )}
                 <div className="text-sm text-gray-900 dark:text-gray-100">
                   {member.nickname}
                 </div>

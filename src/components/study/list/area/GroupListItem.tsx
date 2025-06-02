@@ -5,6 +5,8 @@ import { Users, Lock } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import GroupTagOverflow from "./GroupTagOverflow";
+import dayjs from "dayjs";
+
 interface GroupListItemProps {
   group: {
     id: string;
@@ -18,6 +20,12 @@ interface GroupListItemProps {
     thumbnailFileUrl?: string;
     isJoined?: string;
     tag: string;
+    startDate: string;
+    endDate: string;
+    meetingStartTime: string;
+    meetingEndTime: string;
+    meetingFrequency: string;
+    meetingDay: string;
   };
   onJoinClick: (id: string) => void;
   onJoinCancelClick: (id: string) => void;
@@ -32,26 +40,25 @@ export default function GroupListItem({
     ? Array.from(new Set(group.tag.split(",").map((tag) => tag.trim())))
     : [];
 
+  const DAY_ORDER = ["월", "화", "수", "목", "금", "토", "일"];
+
+  function sortWeekdays(weekdays: string): string {
+    const inputDays = weekdays.split(",");
+    const sorted = DAY_ORDER.filter((day) => inputDays.includes(day));
+    return sorted.join("·"); // 예: "월·화·수·금"
+  }
+
   return (
     <li className="border rounded-lg p-4 shadow-sm dark:border-gray-700 transition hover:shadow-md bg-white dark:bg-gray-900">
       <div className="flex items-start gap-4">
         {/* 썸네일 */}
         <div className="relative w-20 h-20 flex-shrink-0 rounded overflow-hidden bg-gray-200 dark:bg-gray-700">
-          {group.thumbnailFileUrl ? (
-            <Image
-              src={group.thumbnailFileUrl}
-              alt="썸네일"
-              fill
-              className="object-cover"
-            />
-          ) : (
-            <Image
-              src="/images/no-image.png"
-              alt="기본 썸네일"
-              fill
-              className="object-cover"
-            />
-          )}
+          <Image
+            src={group.thumbnailFileUrl || "/images/no-image.png"}
+            alt={group.title || "썸네일"}
+            fill
+            className="object-cover"
+          />
         </div>
 
         {/* 오른쪽 콘텐츠 */}
@@ -69,6 +76,18 @@ export default function GroupListItem({
               </p>
               <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
                 지역: {group.regionEnum}
+              </p>
+              <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
+                {group.startDate} ~ {group.endDate}
+              </p>
+              <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
+                {group.meetingFrequency}{" "}
+                {group.meetingFrequency !== "매일" && group.meetingDay && (
+                  <> [{sortWeekdays(group.meetingDay)}]</>
+                )}
+                {"  "}
+                {group.meetingStartTime?.slice(0, 5) ?? "-"} ~{" "}
+                {group.meetingEndTime?.slice(0, 5) ?? "-"}
               </p>
             </Link>
 

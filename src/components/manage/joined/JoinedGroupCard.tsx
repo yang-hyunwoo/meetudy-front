@@ -31,7 +31,7 @@ export default function JoinedGroupCard({
       {/* 썸네일 */}
       <div className="flex-shrink-0">
         <Image
-          src={thumbnailFileUrl || "/default-thumbnail.png"}
+          src={thumbnailFileUrl || "/images/no-image.png"}
           alt={title}
           width={80}
           height={80}

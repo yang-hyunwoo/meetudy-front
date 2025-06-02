@@ -4,11 +4,14 @@ import { useState, useEffect } from "react";
 import JoinedGroupCard from "@/components/manage/joined/JoinedGroupCard";
 import AttendanceDialog from "@/components/manage/joined/AttendanceDialog";
 import MembersDialog from "@/components/manage/joined/MembersDialog";
+import { api } from "@/lib/axios";
+import dayjs from "dayjs";
+import { useAuthContext } from "@/context/AuthContext";
 
 interface Member {
-  id: string;
+  memberId: string;
   nickname: string;
-  avatarUrl: string;
+  thumbnailFileUrl?: string;
 }
 
 interface JoinedGroup {
@@ -22,30 +25,14 @@ interface JoinedGroup {
   summary: string;
 }
 
+interface attendanceList {
+  attendanceAt: Date;
+  status?: string;
+}
+
 interface JoinedGroupListProps {
   groups: JoinedGroup[];
 }
-
-//  그룹별 출석률 + 출석시간 Mock 데이터
-const groupAttendanceMock: Record<string, { rate: number; times: string[] }> = {
-  g1: {
-    rate: 82,
-    times: ["2025.04.01 18:00", "2025.04.08 18:00", "2025.04.15 18:00"],
-  },
-  g2: {
-    rate: 90,
-    times: [
-      "2025.03.28 19:00",
-      "2025.04.04 19:00",
-      "2025.04.11 19:00",
-      "2025.04.18 19:00",
-    ],
-  },
-  g3: {
-    rate: 75,
-    times: ["2025.04.05 17:00", "2025.04.12 17:00"],
-  },
-};
 
 export default function JoinedGroupList({ groups }: JoinedGroupListProps) {
   const [openAttendanceGroupId, setOpenAttendanceGroupId] = useState<
@@ -54,22 +41,15 @@ export default function JoinedGroupList({ groups }: JoinedGroupListProps) {
   const [openMembersGroupId, setOpenMembersGroupId] = useState<string | null>(
     null,
   );
-
+  const { isLoggedIn } = useAuthContext();
   const [myAttendanceRate, setMyAttendanceRate] = useState<number>(0);
-  const [attendanceTimes, setAttendanceTimes] = useState<string[]>([]);
+  const [attendanceTimes, setAttendanceTimes] = useState<attendanceList[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
-
+  const [groupList, setGroupList] = useState(groups);
   useEffect(() => {
     if (openAttendanceGroupId) {
-      const attendanceData = groupAttendanceMock[openAttendanceGroupId];
-      if (attendanceData) {
-        setMyAttendanceRate(attendanceData.rate);
-        setAttendanceTimes(attendanceData.times);
-      } else {
-        setMyAttendanceRate(0);
-        setAttendanceTimes([]);
-      }
+      groupMemberRate();
     } else {
       setMyAttendanceRate(0);
       setAttendanceTimes([]);
@@ -77,21 +57,61 @@ export default function JoinedGroupList({ groups }: JoinedGroupListProps) {
   }, [openAttendanceGroupId]);
 
   useEffect(() => {
+    setGroupList(groups);
+  }, [groups]);
+
+  const groupMemberRate = async () => {
+    const res = await api.get(
+      `/private/study-group/join/member/${openAttendanceGroupId}/rate`,
+    );
+    if (res.data.httpCode === 200) {
+      setMyAttendanceRate(res.data.data.rate);
+      setAttendanceTimes(res.data.data.attendanceList);
+    } else {
+      setMyAttendanceRate(0);
+    }
+  };
+  const memberWidthdraw = async (groupId: string) => {
+    if (!isLoggedIn) {
+      alert("로그인 후 가능 합니다.");
+      return;
+    }
+
+    if (!confirm("그룹을 탈퇴 하시겠습니까?")) return;
+    try {
+      const res = await api.put(
+        `/private/study-group/join/member/${groupId}/withdraw`,
+      );
+      if (res.data.httpCode == 200) {
+        alert("탈퇴되었습니다.");
+        setGroupList((prev) => prev.filter((g) => g.id !== groupId));
+      }
+    } catch (error: any) {
+      alert(error.response.data?.errCodeMsg);
+    }
+  };
+  useEffect(() => {
     if (openMembersGroupId) {
-      const mockMembers: Member[] = [
-        { id: "u1", nickname: "홍길동", avatarUrl: "/avatar/user1.png" },
-        { id: "u2", nickname: "김철수", avatarUrl: "/avatar/user2.png" },
-        { id: "u3", nickname: "이영희", avatarUrl: "/avatar/user3.png" },
-      ];
-      setMembers(mockMembers);
+      groupMemberList();
     } else {
       setMembers([]);
     }
   }, [openMembersGroupId]);
 
+  const groupMemberList = async () => {
+    const res = await api.get(
+      `/private/study-group/join/member/${openMembersGroupId}/list`,
+    );
+    if (res.data.httpCode === 200) {
+      setMembers(res.data.data);
+    } else {
+      setMembers([]);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      {groups.map((group) => (
+      {groupList.map((group) => (
         <div key={group.id} className="relative">
           {/*  그룹 카드 클릭: 출석률 다이얼로그 */}
 
@@ -102,11 +122,9 @@ export default function JoinedGroupList({ groups }: JoinedGroupListProps) {
             thumbnailFileUrl={group.thumbnailFileUrl ?? ""}
             currentMemberCount={group.currentMemberCount}
             summary={group.summary}
-            onClick={() => setOpenAttendanceGroupId(group.id)} //  그룹 카드 클릭 시 출석률 다이얼로그 열기
+            onClick={() => setOpenAttendanceGroupId(group.id)}
             onClickMembers={() => setOpenMembersGroupId(group.id)}
-            onClickWithdraw={() =>
-              console.log(`${group.title} 탈퇴하기 클릭됨`)
-            }
+            onClickWithdraw={() => memberWidthdraw(group.id)}
           />
 
           {/* 출석률 다이얼로그 */}

@@ -24,6 +24,12 @@ interface StudyGroup {
   tag: string;
   isJoined?: string;
   thumbnailFileUrl?: string;
+  startDate: string;
+  endDate: string;
+  meetingStartTime: string;
+  meetingEndTime: string;
+  meetingFrequency: string;
+  meetingDay: string;
 }
 
 const ITEMS_PER_PAGE = 10;
@@ -131,20 +137,22 @@ export default function GroupList({ region }: { region: string }) {
       );
 
       if (res.data.httpCode === 201) {
-        const updatedId = String(res.data.data.studyGroupId);
-        const updatedStatus = res.data.data.joinStatus;
-
+        const { studyGroupId, joinStatus, currentMemberCount } = res.data.data;
         setStudyGroupList((prevList) =>
           prevList.map((group) =>
-            String(group.id) === String(res.data.data.studyGroupId)
-              ? { ...group, isJoined: res.data.data.joinStatus }
+            String(group.id) === String(studyGroupId)
+              ? {
+                  ...group,
+                  isJoined: joinStatus,
+                  currentMemberCount:
+                    currentMemberCount ?? group.currentMemberCount,
+                }
               : group,
           ),
         );
       }
     } catch (error) {
-      alert("잠시 후 다시 시도해주세요.");
-      console.log("::::" + error);
+      alert("강제퇴장 된 그룹은 참여 하실 수 없습니다.");
     }
   };
 
@@ -187,7 +195,6 @@ export default function GroupList({ region }: { region: string }) {
       }
     } catch (error) {
       alert("잠시 후 다시 시도해주세요.");
-      console.log("::::" + error);
     }
   };
 

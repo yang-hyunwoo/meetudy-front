@@ -78,7 +78,6 @@ export default function GroupDetail({ post, errorMessage }: GroupDetailProps) {
       }
     } catch (error) {
       alert("잠시 후 다시 시도해주세요.");
-      console.log("::::" + error);
     }
   };
 
@@ -111,7 +110,6 @@ export default function GroupDetail({ post, errorMessage }: GroupDetailProps) {
       }
     } catch (error) {
       alert("잠시 후 다시 시도해주세요.");
-      console.log("::::" + error);
     }
   };
 
@@ -190,6 +188,14 @@ export default function GroupDetail({ post, errorMessage }: GroupDetailProps) {
     }
   };
 
+  const DAY_ORDER = ["월", "화", "수", "목", "금", "토", "일"];
+
+  function sortWeekdays(weekdays: string): string {
+    const inputDays = weekdays.split(",");
+    const sorted = DAY_ORDER.filter((day) => inputDays.includes(day));
+    return sorted.join("·"); // 예: "월·화·수·금"
+  }
+
   const handleSubmitComment = async () => {
     if (!isLoggedIn) {
       alert("로그인 후 댓글 작성이 가능합니다.");
@@ -228,6 +234,18 @@ export default function GroupDetail({ post, errorMessage }: GroupDetailProps) {
       <h1 className="text-2xl font-bold mb-2">{post.title}</h1>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
         {post.regionEnum}
+      </p>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+        그룹 시작일 : {post.startDate} ~ {post.endDate}
+      </p>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+        {post.meetingFrequency}{" "}
+        {post.meetingFrequency !== "매일" && post.meetingDay && (
+          <> [{sortWeekdays(post.meetingDay)}]</>
+        )}
+        {"  "}
+        {post.meetingStartTime?.slice(0, 5) ?? "-"} ~{" "}
+        {post.meetingEndTime?.slice(0, 5) ?? "-"}
       </p>
 
       {/* 본문 */}

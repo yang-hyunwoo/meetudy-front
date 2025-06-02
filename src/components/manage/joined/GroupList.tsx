@@ -34,7 +34,7 @@ export default function GroupList({ groups }: GroupListProps) {
     <div className="space-y-8">
       {groups.length === 0 ? (
         <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-          📭 오늘 예정된 스터디가 없습니다.
+          📭 금일 예정된 스터디가 없습니다.
         </div>
       ) : (
         groups.map((group) => {
@@ -109,9 +109,11 @@ export default function GroupList({ groups }: GroupListProps) {
                     입장 불가
                   </Button>
                 )}
-                <Button size="sm" variant="ghost">
-                  상세보기
-                </Button>
+                <Link href={`/study/group/${group.groupId}`}>
+                  <Button size="sm" variant="ghost">
+                    상세보기
+                  </Button>
+                </Link>
               </div>
             </div>
           );
