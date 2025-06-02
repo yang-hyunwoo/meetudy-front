@@ -10,17 +10,20 @@ import axios from "axios";
 
 interface ProfileCardProps {
   profile: {
+    id: string;
     nickname: string;
     email: string;
-    phone: string;
-    avatarUrl: string;
+    phoneNumber: string;
+    profileImageId?: string;
+    profileImageUrl?: string;
+    providerType: string;
   };
   onSave: (nickname: string, phone: string, selectedFile: File | null) => void;
 }
 
 export default function ProfileCard({ profile, onSave }: ProfileCardProps) {
   const [editNickname, setEditNickname] = useState(profile.nickname);
-  const [editPhone, setEditPhone] = useState(profile.phone);
+  const [editPhone, setEditPhone] = useState(profile.phoneNumber);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -52,10 +55,10 @@ export default function ProfileCard({ profile, onSave }: ProfileCardProps) {
         <div className="relative">
           <Avatar className="w-24 h-24">
             <AvatarImage
-              src={previewUrl ? previewUrl : profile.avatarUrl}
+              src={previewUrl ? previewUrl : profile.profileImageUrl}
               alt="프로필 이미지"
             />
-            <AvatarFallback>HW</AvatarFallback>
+            <AvatarFallback>{profile.nickname}</AvatarFallback>
           </Avatar>
           {isEditing && (
             <input
