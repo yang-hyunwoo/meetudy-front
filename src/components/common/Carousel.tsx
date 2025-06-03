@@ -7,12 +7,14 @@ import {
 } from "@/components/ui/carousel";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
+import { NOTICE_TYPE_DISPLAY_MAP } from "@/enum/contactEnum";
 
 interface CarouselItemType {
+  id: string;
   title: string;
-  description: string;
-  imageUrl: string;
-  href?: string;
+  summary?: string;
+  thumbnailFileUrl?: string;
+  noticeType: string;
 }
 
 interface MainCarouselProps {
@@ -27,7 +29,7 @@ export default function MainCarousel({ items }: MainCarouselProps) {
           {items.map((item, index) => (
             <CarouselItem key={index} className="px-8 md:px-12 lg:px-20">
               <Link
-                href={item.href || "#"}
+                href={`/contact/notice/${item.id}`}
                 className="block group"
                 prefetch={false}
               >
@@ -39,19 +41,29 @@ export default function MainCarousel({ items }: MainCarouselProps) {
                 >
                   <div className="flex-1 w-full md:w-auto text-center md:text-left">
                     <span className="text-base font-semibold text-rose-500">
-                      {item.title}
+                      {NOTICE_TYPE_DISPLAY_MAP[item.noticeType] ??
+                        item.noticeType}
                     </span>
                     <h2 className="text-2xl md:text-3xl font-bold mt-4 md:mt-6 mb-6 md:mb-8 text-gray-900 dark:text-gray-100 leading-snug">
-                      {item.description}
+                      {item.title}
                     </h2>
+                    {item.summary && (
+                      <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                        {item.summary}
+                      </p>
+                    )}
                   </div>
                   <div className="relative w-full h-[200px] md:w-[480px] md:h-[300px]">
-                    <Image
-                      src={item.imageUrl}
-                      alt={item.title}
-                      fill
-                      className="object-contain rounded-xl"
-                    />
+                    {item.thumbnailFileUrl && (
+                      <div className="relative w-full h-[200px] md:w-[480px] md:h-[300px]">
+                        <Image
+                          src={item.thumbnailFileUrl}
+                          alt={item.title}
+                          fill
+                          className="object-contain rounded-xl"
+                        />
+                      </div>
+                    )}
                   </div>
                 </Card>
               </Link>

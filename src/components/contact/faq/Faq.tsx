@@ -14,7 +14,6 @@ import DOMPurify from "dompurify";
 import "@/components/common/editor/TiptapEditor.css";
 import { useEffect } from "react";
 import { api } from "@/lib/axios";
-import axios from "axios";
 
 interface FaqItem {
   id: string;

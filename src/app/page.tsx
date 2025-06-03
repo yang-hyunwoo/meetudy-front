@@ -1,52 +1,39 @@
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bell, Plus, Star } from "lucide-react";
+export const dynamic = "force-dynamic";
 import MainCarousel from "@/components/common/Carousel";
 import RecommendedStudyGroups from "@/components/main/RecommendedStudyGroupList";
+import { cookies } from "next/headers";
+import { RequestCookies } from "next/dist/compiled/@edge-runtime/cookies";
 
-const carouselItems = [
-  {
-    title: "안내사항",
-    description:
-      "관련있는 프로젝트를 모아 보고 맞춤형 양식으로 편리하게 지원하세요 🚀",
-    imageUrl: "/images/slide1.png",
-    href: "/contact/notice/list", // 클릭 시 이동할 주소
-  },
-  {
-    title: "프로젝트 추천",
-    description: "관심 주제 기반으로 추천되는 HOT 프로젝트를 확인하세요 🔥",
-    imageUrl: "/images/slide2.png",
-  },
-];
+export default async function MainPage() {
+  const cookieStore = cookies() as unknown as RequestCookies;
+  const accessToken = cookieStore.get("accessToken")?.value;
 
-const studyGroups = [
-  {
-    id: 1,
-    title: "스터디 그룹 1",
-    description: "설명입니다1.",
-    href: "/group/1", // 여기에 상세페이지 링크
-  },
-  {
-    id: 2,
-    title: "스터디 그룹 2",
-    description: "설명입니다2.",
-    href: "/group/2", // 여기에 상세페이지 링크
-  },
-  {
-    id: 3,
-    title: "스터디 그룹 3",
-    description: "설명입니다3.",
-    href: "/group/2", // 여기에 상세페이지 링크
-  },
-];
-export default function MainPage() {
+  const groupList = await fetch(
+    `http://localhost:8080/api/main/study-group/list`,
+    {
+      cache: "no-store",
+      headers: {
+        Authorization: `${accessToken}`,
+      },
+    },
+  );
+
+  const noticeList = await fetch(`http://localhost:8080/api/main/notice/list`, {
+    cache: "no-store",
+    headers: {
+      Authorization: `${accessToken}`,
+    },
+  });
+
+  const groupListData = await groupList.json();
+  const noticeListData = await noticeList.json();
+
   return (
     <div className="w-full px-6 space-y-8">
       <header className="flex justify-between items-center"></header>
-      <MainCarousel items={carouselItems} />
+      <MainCarousel items={noticeListData.data} />
       {/* 추천 스터디 그룹 */}
-      <RecommendedStudyGroups groups={studyGroups} />
+      <RecommendedStudyGroups groups={groupListData.data} />
 
       {/* 공지사항 */}
       <section></section>

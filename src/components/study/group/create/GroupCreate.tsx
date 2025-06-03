@@ -456,8 +456,6 @@ export default function GroupCreatePage({
       const formData = new FormData();
       const deleteFormData = new FormData();
 
-      console.log(defaultValues?.fileId);
-
       if (!hasThumbnail && defaultValues?.fileDetailId) {
         if (defaultValues?.fileId) {
           deleteFormData.append("fileId", defaultValues.fileId);
