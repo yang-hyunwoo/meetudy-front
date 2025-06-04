@@ -18,10 +18,21 @@ interface ProfileCardProps {
     profileImageUrl?: string;
     providerType: string;
   };
-  onSave: (nickname: string, phone: string, selectedFile: File | null) => void;
+  onSave: (
+    nickname: string,
+    phone: string,
+    selectedFile: File | null,
+  ) => Promise<boolean>;
+  editNicknameError?: string;
+  setEditNicknameError?: (msg: string) => void;
 }
 
-export default function ProfileCard({ profile, onSave }: ProfileCardProps) {
+export default function ProfileCard({
+  profile,
+  onSave,
+  editNicknameError,
+  setEditNicknameError,
+}: ProfileCardProps) {
   const [editNickname, setEditNickname] = useState(profile.nickname);
   const [editPhone, setEditPhone] = useState(profile.phoneNumber);
   const [isEditing, setIsEditing] = useState(false);
@@ -34,16 +45,19 @@ export default function ProfileCard({ profile, onSave }: ProfileCardProps) {
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file)); //  여기서 미리 URL 저장
 
-      const formData = new FormData();
-      formData.append("files", file);
+      // const formData = new FormData();
+      // formData.append("files", file);
 
-      const res = await api.post("/private/file-upload", formData);
+      // const res = await api.post("/private/file-upload", formData);
+      console.log(file);
     }
   };
-  const handleSave = () => {
-    onSave(editNickname, editPhone, selectedFile);
-    setIsEditing(false);
-    setSelectedFile(null);
+  const handleSave = async () => {
+    const result = await onSave(editNickname, editPhone, selectedFile);
+    if (result) {
+      setIsEditing(false); // 유효성 검사를 통과했을 때만 수정모드 종료
+      setSelectedFile(null);
+    }
   };
 
   return (
@@ -75,9 +89,18 @@ export default function ProfileCard({ profile, onSave }: ProfileCardProps) {
             <label className="block text-sm font-medium">닉네임</label>
             <Input
               value={editNickname}
-              onChange={(e) => setEditNickname(e.target.value)}
+              onChange={(e) => {
+                setEditNickname(e.target.value);
+                if (editNicknameError && setEditNicknameError) {
+                  setEditNicknameError("");
+                }
+              }}
               disabled={!isEditing}
+              maxLength={20}
             />
+            {editNicknameError && (
+              <p className="text-xs text-red-500 mt-3">{editNicknameError}</p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium">이메일</label>
@@ -89,6 +112,7 @@ export default function ProfileCard({ profile, onSave }: ProfileCardProps) {
               value={editPhone}
               onChange={(e) => setEditPhone(e.target.value)}
               disabled={!isEditing}
+              maxLength={11}
             />
           </div>
         </div>
