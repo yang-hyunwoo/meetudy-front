@@ -8,23 +8,43 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 interface DeleteAccountDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onConfirm: (currentPassword: string) => Promise<void>;
 }
 
 export default function DeleteAccountDialog({
   open,
   onOpenChange,
+  onConfirm,
 }: DeleteAccountDialogProps) {
   const [deletePassword, setDeletePassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
-  const handleDeleteAccount = () => {
-    console.log("회원 탈퇴 비밀번호:", deletePassword);
-    onOpenChange(false);
-    setDeletePassword("");
+  useEffect(() => {
+    if (open) {
+      setPasswordError("");
+    }
+  }, [open]);
+
+  const handleDeleteAccount = async () => {
+    try {
+      await onConfirm(deletePassword);
+      setDeletePassword("");
+      onOpenChange(false);
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setPasswordError(
+          err.response?.data?.message || "비밀번호가 올바르지 않습니다.",
+        );
+      } else {
+        setPasswordError("알 수 없는 오류가 발생했습니다.");
+      }
+    }
   };
 
   return (
@@ -42,6 +62,9 @@ export default function DeleteAccountDialog({
             value={deletePassword}
             onChange={(e) => setDeletePassword(e.target.value)}
           />
+          {passwordError && (
+            <p className="text-sm text-red-500">{passwordError}</p>
+          )}
         </div>
         <div className="flex justify-end mt-5">
           <Button

@@ -8,6 +8,8 @@ import ChangePasswordDialog from "@/components/mypage/ChangePasswordDialog";
 import DeleteAccountDialog from "@/components/mypage/DeleteAccountDialog";
 import { api } from "@/lib/axios";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+import { AuthProvider, useAuthContext } from "@/context/AuthContext";
 
 interface Profile {
   id: string;
@@ -20,22 +22,23 @@ interface Profile {
   filesDetailsId: string;
 }
 
-export default function MyPage() {
-  const [profile, setProfile] = useState<Profile | null>(null);
+interface GroupCount {
+  operationCount: number;
+  joinCount: number;
+}
 
+export default function MyPage() {
+  const router = useRouter();
+  const { isLoggedIn, checkAuth } = useAuthContext();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [groupCount, setGroupCount] = useState<GroupCount | null>(null);
   const [editNickname, setEditNickname] = useState("");
   const [editNicknameError, setEditNicknameError] = useState("");
   const [editPhone, setEditPhone] = useState("");
   const [editPhoneError, setEditPhoneError] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [deletePassword, setDeletePassword] = useState("");
 
   const NICKNAME_REGEX = /^[가-힣a-zA-Z]+$/;
   const NICKNAME_NOT_NULL = "닉네임은 공백일 수 없습니다.";
@@ -47,15 +50,52 @@ export default function MyPage() {
     memberDetail();
   }, []);
 
+  /**
+   * 멤버 상세 조회
+   */
   const memberDetail = async () => {
     const res = await api.get("/private/mypage/profile/detail");
     if (res.data.httpCode == 200) {
-      console.log(res.data.data);
       if (res.data.data) {
         setProfile(res.data.data);
       } else {
       }
     }
+    const group = await api.get("/private/mypage/group/count");
+    if (group.data.httpCode == 200) {
+      if (group.data.data) {
+        setGroupCount(group.data.data);
+      } else {
+      }
+    }
+  };
+
+  /**
+   * 비밀번호 변경
+   * @param currentPassword
+   * @param newPassword
+   */
+  const verifyPassword = async (
+    currentPassword: string,
+    newPassword: string,
+  ) => {
+    var MypagePwdChgReqDto = {
+      currentPw: currentPassword,
+      newPw: newPassword,
+    };
+    const res = await api.put(
+      "/private/mypage/profile/pwd-change",
+      MypagePwdChgReqDto,
+    );
+    if (res.data.httpCode !== 200) {
+      throw new Error("Invalid password");
+    }
+    setIsPasswordModalOpen(true);
+    alert("비밀번호가 변경 되었습니다.");
+  };
+
+  const handleOpenChangePassword = () => {
+    setIsPasswordModalOpen(true);
   };
 
   useEffect(() => {
@@ -64,6 +104,14 @@ export default function MyPage() {
       setEditPhone(profile.phoneNumber);
     }
   }, [profile]);
+
+  /**
+   * 상세 수정
+   * @param nickname
+   * @param phone
+   * @param selectedFile
+   * @returns
+   */
 
   const handleSave = async (
     nickname: string,
@@ -145,6 +193,25 @@ export default function MyPage() {
     return true;
   };
 
+  const verifyWithdraw = async (currentPassword: string) => {
+    var MypageWithdrawReqDto = {
+      currentPw: currentPassword,
+    };
+    const res = await api.put(
+      "/private/mypage/profile/withdraw",
+      MypageWithdrawReqDto,
+    );
+    if (res.data.httpCode !== 200) {
+      throw new Error("Invalid password");
+    }
+    setIsDeleteModalOpen(true);
+    localStorage.removeItem("accessToken");
+    document.cookie =
+      "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    checkAuth(); // ⭐ 상태 업데이트
+    router.push("/mypage/withdraw");
+  };
+
   const setErrorByField = (field: string, message: string) => {
     switch (field) {
       case "nickname":
@@ -181,18 +248,18 @@ export default function MyPage() {
           />
 
           {/* 활동 요약 카드 (데이터 구조에 따라 주석 해제 가능) */}
-          {/* <ActivitySummaryCard
-            operatingGroups={profile.operatingGroups}
-            joinedGroups={profile.joinedGroups}
-          /> */}
+          {groupCount && (
+            <ActivitySummaryCard
+              operatingGroups={groupCount.operationCount}
+              joinedGroups={groupCount.joinCount}
+            />
+          )}
         </>
       )}
 
       {/* 보안 섹션 */}
       <div className="flex flex-col gap-4">
-        <Button onClick={() => setIsPasswordModalOpen(true)}>
-          비밀번호 변경
-        </Button>
+        <Button onClick={handleOpenChangePassword}>비밀번호 변경</Button>
         <Button
           variant="destructive"
           onClick={() => setIsDeleteModalOpen(true)}
@@ -205,10 +272,12 @@ export default function MyPage() {
       <ChangePasswordDialog
         open={isPasswordModalOpen}
         onOpenChange={setIsPasswordModalOpen}
+        onConfirm={verifyPassword}
       />
       <DeleteAccountDialog
         open={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}
+        onConfirm={verifyWithdraw}
       />
     </div>
   );

@@ -30,11 +30,10 @@ export default function RootLayout({
   );
 }
 
-// ⭐ 기존 구조 유지 + useAuthContext로 변경
 function LayoutContents({ children }: { children: React.ReactNode }) {
-  const { isLoggedIn, checkAuth } = useAuthContext(); // ⭐ 수정된 부분
+  const { isLoggedIn, checkAuth } = useAuthContext();
   const pathname = usePathname();
-  const authPages = ["/login", "/join"];
+  const authPages = ["/login", "/join", "/mypage/withdraw"];
   const isAuthPage = authPages.some((path) => pathname?.startsWith(path));
 
   const handleLogout = async () => {
