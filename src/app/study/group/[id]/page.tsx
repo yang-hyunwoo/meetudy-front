@@ -12,7 +12,7 @@ interface PageProps {
 export default async function GroupDetailPage({ params }: PageProps) {
   const cookieStore = cookies() as unknown as RequestCookies;
   const accessToken = cookieStore.get("accessToken")?.value;
-  const refreshToken = cookieStore.get("refreshToken")?.value;
+  const refreshToken = cookieStore.get("refresh-token")?.value;
   const postId = params.id;
   try {
     const res = await fetch(
@@ -21,7 +21,7 @@ export default async function GroupDetailPage({ params }: PageProps) {
         cache: "no-store",
         headers: {
           Authorization: `${accessToken}`,
-          Cookie: `refreshToken=${refreshToken}`,
+          Cookie: `refresh-token=${refreshToken}`,
         },
       },
     );

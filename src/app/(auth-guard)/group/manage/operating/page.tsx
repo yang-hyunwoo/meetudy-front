@@ -6,7 +6,7 @@ import { RequestCookies } from "next/dist/compiled/@edge-runtime/cookies";
 export default async function JoinedGroupOperatingPage() {
   const cookieStore = cookies() as unknown as RequestCookies;
   const accessToken = cookieStore.get("accessToken")?.value;
-  const refreshToken = cookieStore.get("refreshToken")?.value;
+  const refreshToken = cookieStore.get("refresh-token")?.value;
   try {
     const res = await fetch(
       `http://localhost:8080/api/private/study-group/operate/list`,
@@ -14,7 +14,7 @@ export default async function JoinedGroupOperatingPage() {
         cache: "no-store",
         headers: {
           Authorization: `${accessToken}`,
-          Cookie: `refreshToken=${refreshToken}`,
+          Cookie: `refresh-token=${refreshToken}`,
         },
       },
     );

@@ -12,14 +12,14 @@ interface PageProps {
 export default async function BoardDetailPage({ params }: PageProps) {
   const cookieStore = cookies() as unknown as RequestCookies;
   const accessToken = cookieStore.get("accessToken")?.value;
-  const refreshToken = cookieStore.get("refreshToken")?.value;
+  const refreshToken = cookieStore.get("refresh-token")?.value;
   const postId = params.id;
   try {
     const res = await fetch(`http://localhost:8080/api/free-board/${postId}`, {
       cache: "no-store",
       headers: {
         Authorization: `${accessToken}`,
-        Cookie: `refreshToken=${refreshToken}`,
+        Cookie: `refresh-token=${refreshToken}`,
       },
     });
 
