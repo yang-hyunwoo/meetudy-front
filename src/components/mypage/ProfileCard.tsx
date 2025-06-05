@@ -44,12 +44,6 @@ export default function ProfileCard({
     if (file) {
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file)); //  여기서 미리 URL 저장
-
-      // const formData = new FormData();
-      // formData.append("files", file);
-
-      // const res = await api.post("/private/file-upload", formData);
-      console.log(file);
     }
   };
   const handleSave = async () => {

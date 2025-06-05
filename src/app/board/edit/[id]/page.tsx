@@ -15,6 +15,7 @@ export default async function BoardEditPage({
 }) {
   const cookieStore = cookies() as unknown as RequestCookies;
   const accessToken = cookieStore.get("accessToken")?.value;
+  const refreshToken = cookieStore.get("refreshToken")?.value;
   const postId = params.id;
 
   try {
@@ -24,6 +25,7 @@ export default async function BoardEditPage({
         cache: "no-store",
         headers: {
           Authorization: `${accessToken}`,
+          Cookie: `refreshToken=${refreshToken}`,
         },
       },
     );
