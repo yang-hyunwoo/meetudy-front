@@ -101,13 +101,16 @@ export default function GroupList({ groups }: GroupListProps) {
               </div>
               <div className="flex gap-2 mt-4 md:mt-0">
                 {canEnter ? (
-                  <Link href={`/study/group/room`}>
+                  <Link href={`/study/group/${group.groupId}/room`}>
                     <Button size="sm">입장하기</Button>
                   </Link>
                 ) : (
-                  <Button size="sm" disabled variant="secondary">
-                    입장 불가
-                  </Button>
+                  <Link href={`/study/group/${group.groupId}/room`}>
+                    <Button size="sm">입장하기</Button>
+                  </Link>
+                  // <Button size="sm" disabled variant="secondary">
+                  //   입장 불가
+                  // </Button>
                 )}
                 <Link href={`/study/group/${group.groupId}`}>
                   <Button size="sm" variant="ghost">

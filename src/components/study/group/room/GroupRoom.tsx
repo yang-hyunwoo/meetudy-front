@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NoticeTab from "@/components/study/group/room/NoticeTab";
 import FilesTab from "@/components/study/group/room/FilesTab";
@@ -11,8 +10,13 @@ import LinksTab from "@/components/study/group/room/LinksTab";
 import LateUsersTab from "@/components/study/group/room/LateUsersTab";
 import MobileTabModal from "@/components/study/group/room/MobileTabModal";
 import UserListSidebar from "@/components/study/group/room/UserListSidebar";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import DMModal from "@/components/study/group/room/DMModal";
+import { useChatSocket } from "@/hooks/useChatSocket";
+import ChatInput from "./ChatInput";
+import { useParams } from "next/navigation";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import dayjs from "dayjs";
+import "dayjs/locale/ko";
 
 interface User {
   name: string;
@@ -47,6 +51,7 @@ const mockUsers: User[] = [
 ];
 
 export default function GroupRoomLayout() {
+  dayjs.locale("ko");
   const [activeSideTab, setActiveSideTab] = useState<
     "notice" | "files" | "links" | "late"
   >("notice");
@@ -59,16 +64,29 @@ export default function GroupRoomLayout() {
   const [editingText, setEditingText] = useState("");
   const [showSidebar, setShowSidebar] = useState(false);
   const [mobileTabOpen, setMobileTabOpen] = useState(false);
+
   const [currentMobileTab, setCurrentMobileTab] = useState<
     "notice" | "files" | "links" | "late"
   >("notice");
-
+  const params = useParams();
+  const studyGroupId = Number(params.id);
+  const {
+    messages,
+    sendMessage,
+    fetchMoreMessages,
+    hasMore,
+    isInitialLoadDone,
+  } = useChatSocket(studyGroupId);
   // DM용 상태
   const [dmModalOpen, setDmModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [dmMessage, setDmMessage] = useState("");
 
   const lateUsers = mockUsers.filter((user) => user.isLate);
+  const currentUserId = useCurrentUser()?.id;
+  const chatWrapperRef = useRef<HTMLDivElement | null>(null);
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const isFetchingRef = useRef(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -83,6 +101,12 @@ export default function GroupRoomLayout() {
       return true;
     } catch {
       return false;
+    }
+  };
+  const scrollToBottom = () => {
+    const wrapper = chatWrapperRef.current;
+    if (wrapper) {
+      wrapper.scrollTop = wrapper.scrollHeight;
     }
   };
 
@@ -132,6 +156,44 @@ export default function GroupRoomLayout() {
     setEditingText("");
   };
 
+  useEffect(() => {
+    if (isInitialLoadDone) {
+      setTimeout(() => {
+        if (chatWrapperRef.current) {
+          chatWrapperRef.current.scrollTop =
+            chatWrapperRef.current.scrollHeight;
+        }
+      }, 50);
+    }
+  }, [isInitialLoadDone]);
+
+  const handleScroll = useCallback(async () => {
+    const wrapper = chatWrapperRef.current;
+    if (!wrapper || !hasMore || !isInitialLoadDone) return;
+
+    if (isFetchingRef.current) return;
+
+    if (wrapper.scrollTop < 50) {
+      isFetchingRef.current = true;
+      const prevScrollHeight = wrapper.scrollHeight;
+
+      await fetchMoreMessages();
+
+      requestAnimationFrame(() => {
+        wrapper.scrollTop = wrapper.scrollHeight - prevScrollHeight;
+        isFetchingRef.current = false;
+      });
+    }
+  }, [fetchMoreMessages, hasMore, isInitialLoadDone]);
+
+  useEffect(() => {
+    const wrapper = chatWrapperRef.current;
+    if (!wrapper) return;
+
+    wrapper.addEventListener("scroll", handleScroll);
+    return () => wrapper.removeEventListener("scroll", handleScroll);
+  }, [handleScroll]);
+
   return (
     <TooltipProvider>
       <div className="flex flex-col md:flex-row h-[calc(100vh-4rem)] border rounded-lg overflow-hidden relative">
@@ -145,26 +207,70 @@ export default function GroupRoomLayout() {
             setDmModalOpen(true);
           }}
         />
-
         {/*  메인 채팅 영역 */}
-        <main className="flex-1 w-full flex flex-col bg-white dark:bg-zinc-950">
-          <Tabs defaultValue="chat" className="flex-1 flex flex-col">
-            <TabsContent value="chat" className="flex-1 p-4 overflow-y-auto">
-              <div className="text-center text-gray-500 text-sm">
-                채팅 메시지 표시 영역
-              </div>
+        <main className="flex-1 w-full flex flex-col bg-white dark:bg-zinc-950 overflow-hidden">
+          <Tabs
+            defaultValue="chat"
+            className="flex-1 flex flex-col overflow-hidden"
+          >
+            <TabsContent
+              value="chat"
+              className="flex-1 overflow-y-auto p-4 space-y-2"
+              ref={chatWrapperRef}
+            >
+              {messages.map((m, i) => {
+                const isMine = m.senderId === currentUserId;
+                const prevMessage = messages[i - 1];
+                const showDate =
+                  i === 0 ||
+                  !dayjs(m.sentAt).isSame(dayjs(prevMessage.sentAt), "day");
+                return (
+                  <div
+                    key={i}
+                    className={`flex flex-col ${isMine ? "items-end" : "items-start"} space-y-1`}
+                  >
+                    {showDate && (
+                      <div className="text-sm text-muted-foreground my-2 text-center w-full">
+                        📅 {dayjs(m.sentAt).format("YYYY년 MM월 DD일 ddd요일")}
+                      </div>
+                    )}
+                    {/* 상대 메시지일 경우 닉네임 표시 */}
+                    {!isMine && (
+                      <span className="text-sm font-semibold text-muted-foreground">
+                        {m.nickname}
+                      </span>
+                    )}
+
+                    {/* 메시지 말풍선 */}
+                    <div
+                      className={`max-w-xs px-3 py-2 rounded-lg shadow ${
+                        isMine
+                          ? "bg-blue-500 text-white rounded-br-none"
+                          : "bg-gray-200 text-black rounded-bl-none"
+                      }`}
+                    >
+                      <div className="text-base">{m.message}</div>
+                    </div>
+
+                    {/* 날짜는 항상 아래 */}
+                    <span className="text-xs text-muted-foreground px-1">
+                      {dayjs(m.sentAt).format("HH:mm")}
+                    </span>
+                  </div>
+                );
+              })}
+              <div ref={chatEndRef} />
             </TabsContent>
           </Tabs>
 
           {/*  채팅 입력창 */}
-          <div className="flex items-center gap-2 p-3 border-t bg-white dark:bg-zinc-900">
-            <input
-              type="text"
-              placeholder="메시지를 입력하세요"
-              className="flex-1 px-3 py-2 text-sm rounded border dark:bg-zinc-800 dark:text-white"
-            />
-            <Button size="sm">전송</Button>
-          </div>
+          <ChatInput
+            onSend={(message) => {
+              sendMessage(message);
+              // 약간의 딜레이 후 스크롤
+              setTimeout(scrollToBottom, 100);
+            }}
+          />
         </main>
 
         {/* PC 전용 사이드 탭 */}
