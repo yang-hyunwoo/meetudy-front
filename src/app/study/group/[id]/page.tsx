@@ -13,6 +13,7 @@ export default async function GroupDetailPage({ params }: PageProps) {
   const cookieStore = cookies() as unknown as RequestCookies;
   const accessToken = cookieStore.get("accessToken")?.value;
   const refreshToken = cookieStore.get("refresh-token")?.value;
+  const isAutoLogin = cookieStore.get("isAutoLogin")?.value;
   const postId = params.id;
   try {
     const res = await fetch(
@@ -21,7 +22,7 @@ export default async function GroupDetailPage({ params }: PageProps) {
         cache: "no-store",
         headers: {
           Authorization: `${accessToken}`,
-          Cookie: `refresh-token=${refreshToken}`,
+          Cookie: `refresh-token=${refreshToken}; isAutoLogin=${isAutoLogin}`,
         },
       },
     );

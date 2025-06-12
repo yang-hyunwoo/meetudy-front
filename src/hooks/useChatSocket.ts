@@ -1,8 +1,10 @@
+"use client";
 export const dynamic = "force-dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Client, IMessage } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { api } from "@/lib/axios";
+import { usePathname } from "next/navigation";
 
 interface ChatMessageDto {
   studyGroupId: number;
@@ -11,9 +13,13 @@ interface ChatMessageDto {
   senderId: number;
   nickname: string;
   id: number;
+  status: string;
 }
 
-export function useChatSocket(studyGroupId: number) {
+export function useChatSocket(
+  studyGroupId: number,
+  onUserEnter?: (userIds: number[]) => void,
+) {
   const [messages, setMessages] = useState<ChatMessageDto[]>([]);
   const clientRef = useRef<Client | null>(null);
   const groupIdRef = useRef(studyGroupId);
@@ -24,6 +30,9 @@ export function useChatSocket(studyGroupId: number) {
   const isFetchingRef = useRef(false);
   const pageRef = useRef(0);
   const hasFetchedRef = useRef(false);
+  const pathname = usePathname();
+  const prevPath = useRef(pathname);
+
   useEffect(() => {
     groupIdRef.current = studyGroupId;
 
@@ -40,10 +49,37 @@ export function useChatSocket(studyGroupId: number) {
         ),
       reconnectDelay: 5000, // 자동 재연결 시도
       onConnect: () => {
+        //접속시
         console.log("✅ STOMP connected");
         client.subscribe(`/topic/room.${studyGroupId}`, (message: IMessage) => {
-          const body: ChatMessageDto = JSON.parse(message.body);
-          setMessages((prev) => [...prev, body]);
+          const jsonBody = JSON.parse(message.body);
+          if (jsonBody.status === "ENTER") {
+            console.log("접속: " + jsonBody.senderId);
+            onUserEnter?.(jsonBody.senderId); //채팅 접속 시 온라인  표시
+          } else if (jsonBody.status === "LEAVE") {
+            onUserEnter?.([jsonBody.senderId]);
+          } else {
+            const body: ChatMessageDto = jsonBody;
+            setMessages((prev) => [...prev, body]); //메시지
+          }
+        });
+
+        client.publish({
+          //방 입장
+          destination: "/app/chat.enter",
+          body: JSON.stringify({ studyGroupId }),
+        });
+
+        client.subscribe("/user/queue/online", (msg) => {
+          //온라인 사용자 조회
+          const onlineUserIds: number[] = JSON.parse(msg.body);
+          onUserEnter?.(onlineUserIds);
+        });
+        client.subscribe(`/topic/room.${studyGroupId}.online`, (msg) => {
+          const onlineUserIds = JSON.parse(msg.body);
+          console.log("-=----");
+          console.log(onlineUserIds);
+          onUserEnter?.(onlineUserIds); // 또는 setUsers로 직접 처리
         });
       },
       onStompError: (frame) => {
@@ -53,6 +89,15 @@ export function useChatSocket(studyGroupId: number) {
           // TODO: refresh token -> get new accessToken -> re-activate
         }
       },
+      onWebSocketClose: (event) => {
+        console.warn("WebSocket closed:", event);
+        // reconnect 시도 로직 가능
+      },
+
+      // ✅ STOMP disconnect (optional)
+      onDisconnect: (frame) => {
+        console.warn("STOMP disconnected:", frame);
+      },
     });
 
     client.activate();
@@ -60,6 +105,51 @@ export function useChatSocket(studyGroupId: number) {
 
     return () => {
       client.deactivate();
+    };
+  }, [studyGroupId]);
+
+  useEffect(() => {
+    const sendLeaveMessage = () => {
+      if (clientRef.current?.connected) {
+        clientRef.current.publish({
+          destination: "/app/chat.leave",
+          body: JSON.stringify({ studyGroupId }),
+        });
+      }
+    };
+
+    const sendEnterMessage = () => {
+      if (clientRef.current?.connected) {
+        clientRef.current.publish({
+          destination: "/app/chat.enter",
+          body: JSON.stringify({ studyGroupId }),
+        });
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        sendLeaveMessage();
+      } else if (document.visibilityState === "visible") {
+        // 딜레이 주는게 안정적
+        setTimeout(() => {
+          sendEnterMessage();
+        }, 100); // 예: 100ms 정도
+      }
+    };
+
+    // 브라우저 종료
+    window.addEventListener("beforeunload", sendLeaveMessage);
+    window.addEventListener("pagehide", sendLeaveMessage); // 모바일 대응
+
+    // 탭 전환 감지
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      sendLeaveMessage(); // 언마운트 시도
+      window.removeEventListener("beforeunload", sendLeaveMessage);
+      window.removeEventListener("pagehide", sendLeaveMessage);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [studyGroupId]);
 
@@ -123,6 +213,7 @@ export function useChatSocket(studyGroupId: number) {
         nickname: "",
         sentAt: "",
         id: 0,
+        status: "SEND",
       };
 
       clientRef.current.publish({
@@ -139,6 +230,6 @@ export function useChatSocket(studyGroupId: number) {
     fetchMoreMessages,
     hasMore,
     pageRef,
-    isInitialLoadDone, // ⬅ 추가
+    isInitialLoadDone,
   };
 }

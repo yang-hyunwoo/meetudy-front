@@ -12,12 +12,14 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
+import { N } from "@fullcalendar/core/internal-common";
 
 interface User {
+  memberId: number;
   name: string;
   nickname: string;
-  avatarUrl?: string;
-  online: boolean;
+  thumbnailFileUrl?: string;
+  online?: boolean;
 }
 
 interface UserListSidebarProps {
@@ -68,13 +70,13 @@ export default function UserListSidebar({
         <div className="space-y-3">
           {users.map((user, index) => (
             <div
-              key={index}
+              key={user.memberId}
               className="flex items-center gap-3 p-2 bg-white dark:bg-zinc-800 rounded shadow-sm"
             >
               {/* 아바타 */}
               <Avatar className="w-8 h-8">
                 <AvatarImage
-                  src={user.avatarUrl || undefined}
+                  src={user.thumbnailFileUrl || undefined}
                   alt={user.name}
                 />
                 <AvatarFallback>{user.name[0]}</AvatarFallback>

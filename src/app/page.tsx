@@ -8,13 +8,14 @@ export default async function MainPage() {
   const cookieStore = cookies() as unknown as RequestCookies;
   const accessToken = cookieStore.get("accessToken")?.value;
   const refreshToken = cookieStore.get("refresh-token")?.value;
+  const isAutoLogin = cookieStore.get("isAutoLogin")?.value;
   const groupList = await fetch(
     `http://localhost:8080/api/main/study-group/list`,
     {
       cache: "no-store",
       headers: {
         Authorization: `${accessToken}`,
-        Cookie: `refresh-token=${refreshToken}`,
+        Cookie: `refresh-token=${refreshToken}; isAutoLogin=${isAutoLogin}`,
       },
     },
   );
@@ -23,7 +24,7 @@ export default async function MainPage() {
     cache: "no-store",
     headers: {
       Authorization: `${accessToken}`,
-      Cookie: `refresh-token=${refreshToken}`,
+      Cookie: `refresh-token=${refreshToken}; isAutoLogin=${isAutoLogin}`,
     },
   });
 
