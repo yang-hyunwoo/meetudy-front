@@ -17,38 +17,18 @@ import { useParams } from "next/navigation";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
+import { api } from "@/lib/axios";
 
 interface User {
+  memberId: number;
   name: string;
   nickname: string;
-  avatarUrl?: string;
-  online: boolean;
+  thumbnailFileUrl?: string;
+  online?: boolean;
   isLate?: boolean;
 }
 
-const mockUsers: User[] = [
-  {
-    name: "김현우",
-    nickname: "hyeonu",
-    avatarUrl: "",
-    online: true,
-    isLate: false,
-  },
-  {
-    name: "이서윤",
-    nickname: "seoyoon",
-    avatarUrl: "",
-    online: false,
-    isLate: true,
-  },
-  {
-    name: "박민준",
-    nickname: "minjun",
-    avatarUrl: "",
-    online: true,
-    isLate: true,
-  },
-];
+//TODO : 간혈적으로 ON/OFF 오류가 나는듯 함
 
 export default function GroupRoomLayout() {
   dayjs.locale("ko");
@@ -64,29 +44,90 @@ export default function GroupRoomLayout() {
   const [editingText, setEditingText] = useState("");
   const [showSidebar, setShowSidebar] = useState(false);
   const [mobileTabOpen, setMobileTabOpen] = useState(false);
-
   const [currentMobileTab, setCurrentMobileTab] = useState<
     "notice" | "files" | "links" | "late"
   >("notice");
   const params = useParams();
   const studyGroupId = Number(params.id);
+  const [pendingOnlineIds, setPendingOnlineIds] = useState<
+    number[] | number | null
+  >(null);
+  const [users, setUsers] = useState<User[]>([]);
+
+  // DM용 상태
+  const [dmModalOpen, setDmModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [dmMessage, setDmMessage] = useState("");
+  const hasFetchedRef = useRef(false);
+  const lateUsers = users.filter((user) => user.isLate);
+  const currentUserId = useCurrentUser()?.id;
+  const chatWrapperRef = useRef<HTMLDivElement | null>(null);
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const isFetchingRef = useRef(false);
+
+  /**채팅방 접속  */
+  const handleUserEnter = useCallback((incomingIds: number[] | number) => {
+    setUsers((prevUsers) => {
+      if (!prevUsers || prevUsers.length === 0) {
+        console.warn(" users 아직 초기화 안됨");
+        setPendingOnlineIds(incomingIds);
+        return prevUsers;
+      }
+
+      if (Array.isArray(incomingIds)) {
+        const onlineSet = new Set(incomingIds.map(String));
+        return prevUsers.map((user) => {
+          const isOnline = onlineSet.has(String(user.memberId));
+          return { ...user, online: isOnline };
+        });
+      } else {
+        return prevUsers.map((user) =>
+          String(user.memberId) === String(incomingIds)
+            ? { ...user, online: true }
+            : user,
+        );
+      }
+    });
+  }, []);
+
   const {
     messages,
     sendMessage,
     fetchMoreMessages,
     hasMore,
     isInitialLoadDone,
-  } = useChatSocket(studyGroupId);
-  // DM용 상태
-  const [dmModalOpen, setDmModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [dmMessage, setDmMessage] = useState("");
+  } = useChatSocket(studyGroupId, handleUserEnter);
 
-  const lateUsers = mockUsers.filter((user) => user.isLate);
-  const currentUserId = useCurrentUser()?.id;
-  const chatWrapperRef = useRef<HTMLDivElement | null>(null);
-  const chatEndRef = useRef<HTMLDivElement | null>(null);
-  const isFetchingRef = useRef(false);
+  useEffect(() => {
+    if (users.length > 0 && pendingOnlineIds !== null) {
+      console.log("✅ 대기 중이던 온라인 유저 반영");
+      if (hasFetchedRef.current) return;
+      hasFetchedRef.current = true;
+      handleUserEnter(pendingOnlineIds);
+      setPendingOnlineIds(null);
+    }
+  }, [users, pendingOnlineIds]);
+
+  useEffect(() => {
+    console.log(
+      "🟡 users state updated",
+      users.map((u) => [u.memberId, u.online]),
+    );
+  }, [users]);
+
+  useEffect(() => {
+    const memberList = async () => {
+      try {
+        const res = await api.get(`/private/chat/${studyGroupId}/member/list`);
+        setUsers(res.data.data);
+      } catch (err: any) {
+        if (err.response.data.errCode) {
+        }
+      } finally {
+      }
+    };
+    memberList();
+  }, [studyGroupId]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -95,6 +136,7 @@ export default function GroupRoomLayout() {
     }
   };
 
+  //링크 유효성
   const isValidUrl = (url: string) => {
     try {
       new URL(url);
@@ -103,6 +145,8 @@ export default function GroupRoomLayout() {
       return false;
     }
   };
+
+  //채팅 스크롤 이벤트
   const scrollToBottom = () => {
     const wrapper = chatWrapperRef.current;
     if (wrapper) {
@@ -110,6 +154,7 @@ export default function GroupRoomLayout() {
     }
   };
 
+  //링크 등록
   const handleAddLink = () => {
     if (!isValidUrl(linkInput)) {
       alert("유효하지 않은 링크입니다.");
@@ -118,6 +163,7 @@ export default function GroupRoomLayout() {
     setValidLinks((prev) => [...prev, linkInput]);
     setLinkInput("");
   };
+
   const handleSendDM = () => {
     if (!selectedUser || dmMessage.trim() === "") {
       alert("메시지를 입력해주세요.");
@@ -199,11 +245,11 @@ export default function GroupRoomLayout() {
       <div className="flex flex-col md:flex-row h-[calc(100vh-4rem)] border rounded-lg overflow-hidden relative">
         {/*  사용자 목록 사이드바 */}
         <UserListSidebar
-          users={mockUsers}
+          users={users}
           showSidebar={showSidebar}
           onToggleSidebar={() => setShowSidebar(!showSidebar)}
           onDmClick={(user) => {
-            setSelectedUser(user);
+            setSelectedUser(null);
             setDmModalOpen(true);
           }}
         />
@@ -322,7 +368,7 @@ export default function GroupRoomLayout() {
                 onAddLink={handleAddLink}
               />
             )}
-            {activeSideTab === "late" && <LateUsersTab lateUsers={lateUsers} />}
+            {activeSideTab === "late" && <LateUsersTab lateUsers={users} />}
           </div>
         </aside>
 

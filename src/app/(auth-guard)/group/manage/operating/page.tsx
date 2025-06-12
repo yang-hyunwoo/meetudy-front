@@ -7,6 +7,7 @@ export default async function JoinedGroupOperatingPage() {
   const cookieStore = cookies() as unknown as RequestCookies;
   const accessToken = cookieStore.get("accessToken")?.value;
   const refreshToken = cookieStore.get("refresh-token")?.value;
+  const isAutoLogin = cookieStore.get("isAutoLogin")?.value;
   try {
     const res = await fetch(
       `http://localhost:8080/api/private/study-group/operate/list`,
@@ -14,7 +15,7 @@ export default async function JoinedGroupOperatingPage() {
         cache: "no-store",
         headers: {
           Authorization: `${accessToken}`,
-          Cookie: `refresh-token=${refreshToken}`,
+          Cookie: `refresh-token=${refreshToken}; isAutoLogin=${isAutoLogin}`,
         },
       },
     );
