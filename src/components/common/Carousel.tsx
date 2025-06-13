@@ -22,6 +22,14 @@ interface MainCarouselProps {
 }
 
 export default function MainCarousel({ items }: MainCarouselProps) {
+  if (!items || items.length === 0) {
+    return (
+      <div className="w-full bg-muted py-20 px-8 rounded-3xl text-center text-gray-500 dark:text-gray-400">
+        현재 표시할 공지사항이 없습니다.
+      </div>
+    );
+  }
+
   return (
     <div className="w-full bg-muted py-20 px-8 rounded-3xl">
       <Carousel className="w-full max-w-[1600px] mx-auto">

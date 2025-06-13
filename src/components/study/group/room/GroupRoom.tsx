@@ -28,8 +28,6 @@ interface User {
   isLate?: boolean;
 }
 
-//TODO : 간혈적으로 ON/OFF 오류가 나는듯 함
-
 export default function GroupRoomLayout() {
   dayjs.locale("ko");
   const [activeSideTab, setActiveSideTab] = useState<
@@ -38,7 +36,7 @@ export default function GroupRoomLayout() {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [linkInput, setLinkInput] = useState("");
   const [validLinks, setValidLinks] = useState<string[]>([]);
-  const [notices, setNotices] = useState<string[]>([]);
+  // const [notices, setNotices] = useState<string[]>([]);
   const [newNotice, setNewNotice] = useState("");
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingText, setEditingText] = useState("");
@@ -49,43 +47,46 @@ export default function GroupRoomLayout() {
   >("notice");
   const params = useParams();
   const studyGroupId = Number(params.id);
-  const [pendingOnlineIds, setPendingOnlineIds] = useState<
-    number[] | number | null
-  >(null);
   const [users, setUsers] = useState<User[]>([]);
+  const [isUsersLoaded, setIsUsersLoaded] = useState(false);
 
   // DM용 상태
   const [dmModalOpen, setDmModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [dmMessage, setDmMessage] = useState("");
-  const hasFetchedRef = useRef(false);
   const lateUsers = users.filter((user) => user.isLate);
   const currentUserId = useCurrentUser()?.id;
   const chatWrapperRef = useRef<HTMLDivElement | null>(null);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const isFetchingRef = useRef(false);
+  const [isOwner, setIsOwner] = useState(false);
 
-  /**채팅방 접속  */
+  /**채팅방 접속 핸들러 수정 */
   const handleUserEnter = useCallback((incomingIds: number[] | number) => {
     setUsers((prevUsers) => {
       if (!prevUsers || prevUsers.length === 0) {
-        console.warn(" users 아직 초기화 안됨");
-        setPendingOnlineIds(incomingIds);
+        console.warn("⚠️ users 아직 초기화 안됨, 상태 업데이트 스킵");
         return prevUsers;
       }
 
       if (Array.isArray(incomingIds)) {
         const onlineSet = new Set(incomingIds.map(String));
-        return prevUsers.map((user) => {
+        const updatedUsers = prevUsers.map((user) => {
           const isOnline = onlineSet.has(String(user.memberId));
           return { ...user, online: isOnline };
         });
+        console.log(
+          "🟢 온라인 상태 업데이트 완료:",
+          updatedUsers.map((u) => [u.memberId, u.online]),
+        );
+        return updatedUsers;
       } else {
-        return prevUsers.map((user) =>
+        const updatedUsers = prevUsers.map((user) =>
           String(user.memberId) === String(incomingIds)
             ? { ...user, online: true }
             : user,
         );
+        return updatedUsers;
       }
     });
   }, []);
@@ -96,38 +97,52 @@ export default function GroupRoomLayout() {
     fetchMoreMessages,
     hasMore,
     isInitialLoadDone,
+    sendNotice,
+    notices,
+    sendLink,
+    links,
   } = useChatSocket(studyGroupId, handleUserEnter);
 
-  useEffect(() => {
-    if (users.length > 0 && pendingOnlineIds !== null) {
-      console.log("✅ 대기 중이던 온라인 유저 반영");
-      if (hasFetchedRef.current) return;
-      hasFetchedRef.current = true;
-      handleUserEnter(pendingOnlineIds);
-      setPendingOnlineIds(null);
-    }
-  }, [users, pendingOnlineIds]);
-
-  useEffect(() => {
-    console.log(
-      "🟡 users state updated",
-      users.map((u) => [u.memberId, u.online]),
-    );
-  }, [users]);
-
+  // users 로드
   useEffect(() => {
     const memberList = async () => {
       try {
         const res = await api.get(`/private/chat/${studyGroupId}/member/list`);
-        setUsers(res.data.data);
+        const userData = res.data.data;
+        setUsers(userData);
+        setIsUsersLoaded(true);
       } catch (err: any) {
-        if (err.response.data.errCode) {
+        if (err.response?.data?.errCode) {
+          // 에러 처리
         }
-      } finally {
       }
     };
-    memberList();
+
+    const noticeAuth = async () => {
+      try {
+        const res = await api.get(`/private/chat/${studyGroupId}/notice/auth`);
+        const data = res.data.data;
+        setIsOwner(data);
+      } catch (err: any) {
+        if (err.response?.data?.errCode) {
+          // 에러 처리
+        }
+      }
+    };
+
+    if (studyGroupId) {
+      memberList();
+      noticeAuth();
+    }
   }, [studyGroupId]);
+
+  // users가 로드된 후 소켓 재연결 트리거 (필요한 경우)
+  useEffect(() => {
+    if (isUsersLoaded && users.length > 0) {
+      console.log("✅ users 로드 완료, 온라인 상태 확인 준비됨");
+      // 여기서 필요하다면 소켓에 현재 온라인 상태를 다시 요청할 수 있습니다
+    }
+  }, [isUsersLoaded, users]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -155,12 +170,13 @@ export default function GroupRoomLayout() {
   };
 
   //링크 등록
-  const handleAddLink = () => {
+  const handleAddLink = (linkUrl: string, type: string) => {
     if (!isValidUrl(linkInput)) {
       alert("유효하지 않은 링크입니다.");
       return;
     }
-    setValidLinks((prev) => [...prev, linkInput]);
+    sendLink(linkUrl, type, 0);
+    //setValidLinks((prev) => [...prev, linkInput]);
     setLinkInput("");
   };
 
@@ -178,26 +194,34 @@ export default function GroupRoomLayout() {
     setSelectedUser(null);
   };
 
-  const handleAddNotice = () => {
+  //공지사항 작성
+  const addNotice = (notice: string, type: string) => {
+    sendNotice(notice, type, 0);
     if (newNotice.trim() === "") return;
-    setNotices((prev) => [...prev, newNotice.trim()]);
     setNewNotice("");
   };
 
   const handleDeleteNotice = (index: number) => {
-    setNotices((prev) => prev.filter((_, i) => i !== index));
+    if (confirm("공지를 삭제 하시겠습니까?")) {
+      sendNotice("", "DELETE", index);
+    }
+    // setNotices((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDeleteLink = (id: number) => {
+    if (confirm("링크를 삭제 하시겠습니까?")) {
+      sendLink("", "DELETE", id);
+    }
   };
 
   const handleEditNotice = (index: number) => {
     setEditingIndex(index);
-    setEditingText(notices[index]);
+    // setEditingText(notices[index]);
   };
 
   const handleSaveEdit = () => {
     if (editingIndex === null || editingText.trim() === "") return;
-    const updated = [...notices];
-    updated[editingIndex] = editingText.trim();
-    setNotices(updated);
+    sendNotice(editingText.trim(), "UPDATE", editingIndex);
     setEditingIndex(null);
     setEditingText("");
   };
@@ -346,12 +370,13 @@ export default function GroupRoomLayout() {
                 editingIndex={editingIndex}
                 editingText={editingText}
                 onNewNoticeChange={setNewNotice}
-                onAddNotice={handleAddNotice}
+                onAddNotice={() => addNotice(newNotice, "CREATE")}
                 onEditNotice={handleEditNotice}
                 onDeleteNotice={handleDeleteNotice}
                 onEditingTextChange={setEditingText}
                 onSaveEdit={handleSaveEdit}
                 onCancelEdit={() => setEditingIndex(null)}
+                isOwner={isOwner}
               />
             )}
             {activeSideTab === "files" && (
@@ -362,10 +387,11 @@ export default function GroupRoomLayout() {
             )}
             {activeSideTab === "links" && (
               <LinksTab
-                validLinks={validLinks}
+                validLinks={links}
                 linkInput={linkInput}
                 onLinkInputChange={setLinkInput}
-                onAddLink={handleAddLink}
+                handleDeleteLink={handleDeleteLink}
+                onAddLink={() => handleAddLink(linkInput, "CREATE")}
               />
             )}
             {activeSideTab === "late" && <LateUsersTab lateUsers={users} />}
@@ -415,12 +441,13 @@ export default function GroupRoomLayout() {
               editingIndex={editingIndex}
               editingText={editingText}
               onNewNoticeChange={setNewNotice}
-              onAddNotice={handleAddNotice}
+              onAddNotice={() => addNotice(newNotice, "create")}
               onEditNotice={handleEditNotice}
               onDeleteNotice={handleDeleteNotice}
               onEditingTextChange={setEditingText}
               onSaveEdit={handleSaveEdit}
               onCancelEdit={() => setEditingIndex(null)}
+              isOwner={isOwner}
             />
           )}
           {currentMobileTab === "files" && (
@@ -431,10 +458,11 @@ export default function GroupRoomLayout() {
           )}
           {currentMobileTab === "links" && (
             <LinksTab
-              validLinks={validLinks}
+              validLinks={links}
               linkInput={linkInput}
               onLinkInputChange={setLinkInput}
-              onAddLink={handleAddLink}
+              handleDeleteLink={handleDeleteLink}
+              onAddLink={() => handleAddLink(linkInput, "CREATE")}
             />
           )}
           {currentMobileTab === "late" && (

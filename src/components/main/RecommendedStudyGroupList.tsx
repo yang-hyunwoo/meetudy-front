@@ -21,6 +21,14 @@ interface RecommendedStudyGroupsProps {
 export default function RecommendedStudyGroups({
   groups,
 }: RecommendedStudyGroupsProps) {
+  if (!groups || groups.length === 0) {
+    return (
+      <section className="py-8">
+        <h2 className="text-xl font-semibold mb-4">🔥 추천 스터디 그룹</h2>
+        <p className="text-muted-foreground text-sm">추천 그룹이 없습니다.</p>
+      </section>
+    );
+  }
   return (
     <section className="py-8">
       <h2 className="text-xl font-semibold mb-4">🔥 추천 스터디 그룹</h2>
