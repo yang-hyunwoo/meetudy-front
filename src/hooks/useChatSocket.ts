@@ -34,9 +34,20 @@ interface ChatLinkDto {
   modifyChk: boolean;
 }
 
+interface User {
+  memberId: number;
+  name: string;
+  nickname: string;
+  thumbnailFileUrl?: string;
+  online?: boolean;
+  isLate?: boolean;
+}
+
 export function useChatSocket(
   studyGroupId: number,
   onUserEnter?: (userIds: number[]) => void,
+  onUserJoin?: (newUser: User) => void,
+  onUserLeave?: (newUser: User) => void,
 ) {
   const [messages, setMessages] = useState<ChatMessageDto[]>([]);
 
@@ -129,6 +140,19 @@ export function useChatSocket(
             setLinks((prev) => prev.filter((n) => n.id !== links.id));
           }
         });
+
+        //그룹 가입 사용자
+        client.subscribe(`/topic/group.${studyGroupId}.member.join`, (msg) => {
+          const newUser: User = JSON.parse(msg.body);
+          onUserJoin?.(newUser);
+        });
+
+        //그룹 탈퇴 사용자
+        client.subscribe(`/topic/group.${studyGroupId}.member.leave`, (msg) => {
+          const newUser: User = JSON.parse(msg.body);
+          console.log("111111111111");
+          onUserLeave?.(newUser);
+        });
       },
       onStompError: (frame) => {
         console.error("🔴 STOMP error:", frame);
@@ -154,7 +178,7 @@ export function useChatSocket(
     return () => {
       client.deactivate();
     };
-  }, [studyGroupId]);
+  }, [studyGroupId, currentUserId]);
 
   //새로고침 , 탭 이동 시 사용자 온라인, 오프라인 여부 체크
   useEffect(() => {
@@ -212,12 +236,16 @@ export function useChatSocket(
     pageRef.current = 1; // 첫 페이지 로드 이후부터 시작
     fetchMessages(0).then(() => setInitialLoadDone(true));
     NoticeList();
-    LinkList();
   }, [studyGroupId]);
+
+  useEffect(() => {
+    if (currentUserId !== undefined) {
+      LinkList();
+    }
+  }, [currentUserId]);
 
   const NoticeList = async () => {
     const res = await api.get(`/private/chat/${studyGroupId}/notice/list`);
-    console.log(res.data.data);
     const data: ChatNoticeDto[] = res.data.data;
     setNotices((prev) => {
       const merged = [...data, ...prev];
