@@ -79,7 +79,7 @@ export default function UserListSidebar({
                   src={user.thumbnailFileUrl || undefined}
                   alt={user.name}
                 />
-                <AvatarFallback>{user.name[0]}</AvatarFallback>
+                <AvatarFallback>{user.nickname[0]}</AvatarFallback>
               </Avatar>
 
               {/* 닉네임 + 이름 */}

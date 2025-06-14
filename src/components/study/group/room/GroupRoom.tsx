@@ -91,6 +91,19 @@ export default function GroupRoomLayout() {
     });
   }, []);
 
+  const handleNewMemberJoin = useCallback((newUser: User) => {
+    setUsers((prev) => {
+      const exists = prev.some((u) => u.memberId === newUser.memberId);
+      if (exists) return prev;
+      return [...prev, newUser];
+    });
+  }, []);
+
+  const handleNewMemberLeave = useCallback((newUser: User) => {
+    console.log(newUser);
+    setUsers((prev) => prev.filter((n) => n.memberId !== newUser.memberId));
+  }, []);
+
   const {
     messages,
     sendMessage,
@@ -101,7 +114,12 @@ export default function GroupRoomLayout() {
     notices,
     sendLink,
     links,
-  } = useChatSocket(studyGroupId, handleUserEnter);
+  } = useChatSocket(
+    studyGroupId,
+    handleUserEnter,
+    handleNewMemberJoin,
+    handleNewMemberLeave,
+  );
 
   // users 로드
   useEffect(() => {
@@ -205,7 +223,6 @@ export default function GroupRoomLayout() {
     if (confirm("공지를 삭제 하시겠습니까?")) {
       sendNotice("", "DELETE", index);
     }
-    // setNotices((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleDeleteLink = (id: number) => {

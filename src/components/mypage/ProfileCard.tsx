@@ -66,7 +66,7 @@ export default function ProfileCard({
               src={previewUrl ? previewUrl : profile.profileImageUrl}
               alt="프로필 이미지"
             />
-            <AvatarFallback>{profile.nickname}</AvatarFallback>
+            <AvatarFallback>{profile.nickname[0]}</AvatarFallback>
           </Avatar>
           {isEditing && (
             <input
