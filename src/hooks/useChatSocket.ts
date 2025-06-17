@@ -34,6 +34,29 @@ interface ChatLinkDto {
   modifyChk: boolean;
 }
 
+interface ChatDocumentDto {
+  studyGroupId: number;
+  memberId: number;
+  fileId: number;
+  status?: "CREATE" | "READ" | "DELETE"; // enum 가능
+  file: FileMessage;
+  modifyChk: boolean;
+  id: number;
+}
+
+interface FileMessage {
+  filesDetails: FilesDetailsDto[];
+}
+
+interface FilesDetailsDto {
+  id: number;
+  originFileName: string;
+  fileUrl: string;
+  filesId: number;
+  memberId: number;
+  modifyChk: boolean;
+}
+
 interface User {
   memberId: number;
   name: string;
@@ -52,7 +75,7 @@ export function useChatSocket(
   const [messages, setMessages] = useState<ChatMessageDto[]>([]);
 
   const [notices, setNotices] = useState<ChatNoticeDto[]>([]);
-
+  const [documents, setDocuments] = useState<ChatDocumentDto[]>([]);
   const [links, setLinks] = useState<ChatLinkDto[]>([]);
   const clientRef = useRef<Client | null>(null);
   const groupIdRef = useRef(studyGroupId);
@@ -129,7 +152,7 @@ export function useChatSocket(
           }
         });
 
-        //링크
+        //링크 구독
         client.subscribe(`/topic/link.${studyGroupId}`, (msg) => {
           const links: ChatLinkDto = JSON.parse(msg.body);
           if (links.status === "CREATE") {
@@ -150,8 +173,23 @@ export function useChatSocket(
         //그룹 탈퇴 사용자
         client.subscribe(`/topic/group.${studyGroupId}.member.leave`, (msg) => {
           const newUser: User = JSON.parse(msg.body);
-          console.log("111111111111");
           onUserLeave?.(newUser);
+        });
+
+        //자료 구독
+        client.subscribe(`/topic/document.${studyGroupId}`, (msg) => {
+          const newDocument: ChatDocumentDto = JSON.parse(msg.body);
+
+          if (newDocument.status === "CREATE") {
+            newDocument.modifyChk = newDocument.memberId === currentUserId;
+
+            setDocuments((prev) => [newDocument, ...prev]);
+          } else if (newDocument.status === "DELETE") {
+            //TODO 삭제 ....
+            setDocuments((prev) =>
+              prev.filter((n) => n.fileId !== newDocument.fileId),
+            );
+          }
         });
       },
       onStompError: (frame) => {
@@ -241,6 +279,7 @@ export function useChatSocket(
   useEffect(() => {
     if (currentUserId !== undefined) {
       LinkList();
+      DocumentList();
     }
   }, [currentUserId]);
 
@@ -255,9 +294,7 @@ export function useChatSocket(
   };
 
   const LinkList = async () => {
-    console.log(currentUserId);
     const res = await api.get(`/private/chat/${studyGroupId}/link/list`);
-    console.log(res.data.data);
     const data: ChatLinkDto[] = res.data.data;
     const withModifyFlag = data.map((link) => ({
       ...link,
@@ -267,6 +304,25 @@ export function useChatSocket(
     setLinks((prev) => {
       const merged = [...withModifyFlag, ...prev];
       const unique = Array.from(new Map(merged.map((m) => [m.id, m])).values());
+      return unique;
+    });
+  };
+
+  const DocumentList = async () => {
+    const res = await api.get(`/private/chat/${studyGroupId}/document/list`);
+    const data: ChatDocumentDto[] = res.data.data;
+    console.log(currentUserId);
+    const withModifyFlag = data.map((document) => ({
+      ...document,
+      modifyChk: document.memberId === currentUserId,
+    }));
+    console.log("4444");
+    console.log(withModifyFlag);
+    setDocuments((prev) => {
+      const merged = [...withModifyFlag, ...prev];
+      const unique = Array.from(
+        new Map(merged.map((m) => [m.fileId, m])).values(),
+      );
       return unique;
     });
   };
@@ -374,6 +430,59 @@ export function useChatSocket(
       console.warn("🔴 STOMP client is not connected.");
     }
   };
+  const sendDocument = (payload: {
+    fileId: number;
+    memberId: number;
+    filesDetails: {
+      id: number;
+      filesId: number;
+      originFileName: string;
+      fileUrl: string;
+      publicId: string;
+    }[];
+  }) => {
+    if (clientRef.current?.connected) {
+      const fileMessage = {
+        studyGroupId: groupIdRef.current,
+        senderId: 0, // 서버에서 설정
+        sentAt: "",
+        id: 0,
+        status: "CREATE",
+        message: "", // 메시지는 비워두고
+        file: payload, // 실제 파일 정보 전달
+        fileId: payload.fileId,
+      };
+
+      clientRef.current.publish({
+        destination: `/app/document.send`,
+        body: JSON.stringify(fileMessage),
+      });
+    } else {
+      console.warn("🔴 STOMP client is not connected.");
+    }
+  };
+
+  const deleteDocument = (id: number, fileId: number, fileDetailId: number) => {
+    if (clientRef.current?.connected) {
+      const fileMessage = {
+        studyGroupId: groupIdRef.current,
+        senderId: 0, // 서버에서 설정
+        sentAt: "",
+        id: id,
+        status: "DELETE",
+        message: "", // 메시지는 비워두고
+        fileId: fileId,
+        fileDetailId: fileDetailId,
+      };
+
+      clientRef.current.publish({
+        destination: `/app/document.send`,
+        body: JSON.stringify(fileMessage),
+      });
+    } else {
+      console.warn("🔴 STOMP client is not connected.");
+    }
+  };
 
   return {
     sendMessage,
@@ -386,5 +495,8 @@ export function useChatSocket(
     notices,
     sendLink,
     links,
+    sendDocument,
+    documents,
+    deleteDocument,
   };
 }
