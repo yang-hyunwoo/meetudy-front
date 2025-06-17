@@ -33,10 +33,7 @@ export default function GroupRoomLayout() {
   const [activeSideTab, setActiveSideTab] = useState<
     "notice" | "files" | "links" | "late"
   >("notice");
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [linkInput, setLinkInput] = useState("");
-  const [validLinks, setValidLinks] = useState<string[]>([]);
-  // const [notices, setNotices] = useState<string[]>([]);
   const [newNotice, setNewNotice] = useState("");
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingText, setEditingText] = useState("");
@@ -60,6 +57,7 @@ export default function GroupRoomLayout() {
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const isFetchingRef = useRef(false);
   const [isOwner, setIsOwner] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   /**채팅방 접속 핸들러 수정 */
   const handleUserEnter = useCallback((incomingIds: number[] | number) => {
@@ -114,6 +112,9 @@ export default function GroupRoomLayout() {
     notices,
     sendLink,
     links,
+    sendDocument,
+    documents,
+    deleteDocument,
   } = useChatSocket(
     studyGroupId,
     handleUserEnter,
@@ -162,10 +163,24 @@ export default function GroupRoomLayout() {
     }
   }, [isUsersLoaded, users]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files) {
-      setUploadedFiles((prev) => [...prev, ...Array.from(files)]);
+    if (!files || files.length === 0) return;
+
+    const formData = new FormData();
+    Array.from(files).forEach((file) => formData.append("files", file));
+
+    setIsUploading(true); // ⬅️ 여기서 시작
+    try {
+      const uploadRes = await api.post("/private/file-upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      const uploadedData = uploadRes.data.data;
+      sendDocument(uploadedData);
+    } catch (err) {
+      console.error("파일 업로드 실패", err);
+    } finally {
+      setIsUploading(false); // ⬅️ 여기서 종료
     }
   };
 
@@ -194,7 +209,6 @@ export default function GroupRoomLayout() {
       return;
     }
     sendLink(linkUrl, type, 0);
-    //setValidLinks((prev) => [...prev, linkInput]);
     setLinkInput("");
   };
 
@@ -228,6 +242,16 @@ export default function GroupRoomLayout() {
   const handleDeleteLink = (id: number) => {
     if (confirm("링크를 삭제 하시겠습니까?")) {
       sendLink("", "DELETE", id);
+    }
+  };
+
+  const handleDeleteDocument = (
+    id: number,
+    fileId: number,
+    fileDetailId: number,
+  ) => {
+    if (confirm("자료를 삭제 하시겠습니까?")) {
+      deleteDocument(id, fileId, fileDetailId);
     }
   };
 
@@ -398,8 +422,10 @@ export default function GroupRoomLayout() {
             )}
             {activeSideTab === "files" && (
               <FilesTab
-                uploadedFiles={uploadedFiles}
+                uploadedFiles={documents}
                 onFileChange={handleFileChange}
+                isUploading={isUploading}
+                handleDeleteDocument={handleDeleteDocument}
               />
             )}
             {activeSideTab === "links" && (
@@ -469,8 +495,10 @@ export default function GroupRoomLayout() {
           )}
           {currentMobileTab === "files" && (
             <FilesTab
-              uploadedFiles={uploadedFiles}
+              uploadedFiles={documents}
               onFileChange={handleFileChange}
+              isUploading={isUploading}
+              handleDeleteDocument={handleDeleteDocument}
             />
           )}
           {currentMobileTab === "links" && (
