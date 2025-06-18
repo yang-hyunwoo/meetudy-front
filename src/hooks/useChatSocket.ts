@@ -42,6 +42,7 @@ interface ChatDocumentDto {
   file: FileMessage;
   modifyChk: boolean;
   id: number;
+  fileDetailId: number;
 }
 
 interface FileMessage {
@@ -181,13 +182,39 @@ export function useChatSocket(
           const newDocument: ChatDocumentDto = JSON.parse(msg.body);
 
           if (newDocument.status === "CREATE") {
+            //실시간 생성
             newDocument.modifyChk = newDocument.memberId === currentUserId;
-
             setDocuments((prev) => [newDocument, ...prev]);
           } else if (newDocument.status === "DELETE") {
-            //TODO 삭제 ....
+            //실시간 삭제
             setDocuments((prev) =>
-              prev.filter((n) => n.fileId !== newDocument.fileId),
+              prev
+                .map((doc) => {
+                  const originalFiles = doc.file.filesDetails;
+                  const updatedFiles = originalFiles.filter(
+                    (f) => f.id !== newDocument.fileDetailId,
+                  );
+
+                  const wasDeleted =
+                    updatedFiles.length !== originalFiles.length;
+
+                  if (wasDeleted) {
+                    if (updatedFiles.length > 0) {
+                      return {
+                        ...doc,
+                        file: {
+                          ...doc.file,
+                          filesDetails: updatedFiles,
+                        },
+                      };
+                    } else {
+                      return null;
+                    }
+                  }
+
+                  return doc;
+                })
+                .filter((v): v is ChatDocumentDto => v !== null),
             );
           }
         });
@@ -311,13 +338,10 @@ export function useChatSocket(
   const DocumentList = async () => {
     const res = await api.get(`/private/chat/${studyGroupId}/document/list`);
     const data: ChatDocumentDto[] = res.data.data;
-    console.log(currentUserId);
     const withModifyFlag = data.map((document) => ({
       ...document,
       modifyChk: document.memberId === currentUserId,
     }));
-    console.log("4444");
-    console.log(withModifyFlag);
     setDocuments((prev) => {
       const merged = [...withModifyFlag, ...prev];
       const unique = Array.from(
