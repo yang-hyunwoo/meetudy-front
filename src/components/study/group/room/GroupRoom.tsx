@@ -98,7 +98,6 @@ export default function GroupRoomLayout() {
   }, []);
 
   const handleNewMemberLeave = useCallback((newUser: User) => {
-    console.log(newUser);
     setUsers((prev) => prev.filter((n) => n.memberId !== newUser.memberId));
   }, []);
 
