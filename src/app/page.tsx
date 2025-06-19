@@ -10,7 +10,7 @@ export default async function MainPage() {
   const refreshToken = cookieStore.get("refresh-token")?.value;
   const isAutoLogin = cookieStore.get("isAutoLogin")?.value;
   const groupList = await fetch(
-    `http://localhost:8080/api/main/study-group/list`,
+    process.env.NEXT_PUBLIC_API_URL + `/main/study-group/list`,
     {
       cache: "no-store",
       headers: {
@@ -20,15 +20,19 @@ export default async function MainPage() {
     },
   );
 
-  const noticeList = await fetch(`http://localhost:8080/api/main/notice/list`, {
-    cache: "no-store",
-    headers: {
-      Authorization: `${accessToken}`,
-      Cookie: `refresh-token=${refreshToken}; isAutoLogin=${isAutoLogin}`,
+  const noticeList = await fetch(
+    process.env.NEXT_PUBLIC_API_URL + `main/notice/list`,
+    {
+      cache: "no-store",
+      headers: {
+        Authorization: `${accessToken}`,
+        Cookie: `refresh-token=${refreshToken}; isAutoLogin=${isAutoLogin}`,
+      },
     },
-  });
+  );
 
   const groupListData = await groupList.json();
+  console.log(groupListData);
   const noticeListData = await noticeList.json();
 
   return (

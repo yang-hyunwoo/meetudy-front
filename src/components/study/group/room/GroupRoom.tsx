@@ -18,6 +18,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import { api } from "@/lib/axios";
+import { useRouter } from "next/navigation";
 
 interface User {
   memberId: number;
@@ -28,7 +29,11 @@ interface User {
   isLate?: boolean;
 }
 
-export default function GroupRoomLayout() {
+export default function GroupRoomLayout({
+  errorMessage,
+}: {
+  errorMessage?: string;
+}) {
   dayjs.locale("ko");
   const [activeSideTab, setActiveSideTab] = useState<
     "notice" | "files" | "links" | "late"
@@ -46,7 +51,8 @@ export default function GroupRoomLayout() {
   const studyGroupId = Number(params.id);
   const [users, setUsers] = useState<User[]>([]);
   const [isUsersLoaded, setIsUsersLoaded] = useState(false);
-
+  const router = useRouter();
+  const hasRun = useRef(false);
   // DM용 상태
   const [dmModalOpen, setDmModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -58,6 +64,51 @@ export default function GroupRoomLayout() {
   const isFetchingRef = useRef(false);
   const [isOwner, setIsOwner] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    if (errorMessage && !hasRun.current) {
+      hasRun.current = true;
+      alert(errorMessage);
+      router.push("/group/manage/joined");
+      return;
+    }
+    // ✅ 여기에 기존 API 요청
+    if (!errorMessage && studyGroupId) {
+      const memberList = async () => {
+        try {
+          const res = await api.get(
+            `/private/chat/${studyGroupId}/member/list`,
+          );
+          const userData = res.data.data;
+          setUsers(userData);
+          setIsUsersLoaded(true);
+        } catch (err: any) {
+          if (err.response?.data?.errCode) {
+            // 에러 처리
+          }
+        }
+      };
+
+      const noticeAuth = async () => {
+        try {
+          const res = await api.get(
+            `/private/chat/${studyGroupId}/notice/auth`,
+          );
+          const data = res.data.data;
+          setIsOwner(data);
+        } catch (err: any) {
+          if (err.response?.data?.errCode) {
+            // 에러 처리
+          }
+        }
+      };
+
+      if (!errorMessage && studyGroupId) {
+        memberList();
+        noticeAuth();
+      }
+    }
+  }, [studyGroupId, errorMessage]);
 
   /**채팅방 접속 핸들러 수정 */
   const handleUserEnter = useCallback((incomingIds: number[] | number) => {
@@ -119,40 +170,8 @@ export default function GroupRoomLayout() {
     handleUserEnter,
     handleNewMemberJoin,
     handleNewMemberLeave,
+    errorMessage,
   );
-
-  // users 로드
-  useEffect(() => {
-    const memberList = async () => {
-      try {
-        const res = await api.get(`/private/chat/${studyGroupId}/member/list`);
-        const userData = res.data.data;
-        setUsers(userData);
-        setIsUsersLoaded(true);
-      } catch (err: any) {
-        if (err.response?.data?.errCode) {
-          // 에러 처리
-        }
-      }
-    };
-
-    const noticeAuth = async () => {
-      try {
-        const res = await api.get(`/private/chat/${studyGroupId}/notice/auth`);
-        const data = res.data.data;
-        setIsOwner(data);
-      } catch (err: any) {
-        if (err.response?.data?.errCode) {
-          // 에러 처리
-        }
-      }
-    };
-
-    if (studyGroupId) {
-      memberList();
-      noticeAuth();
-    }
-  }, [studyGroupId]);
 
   // users가 로드된 후 소켓 재연결 트리거 (필요한 경우)
   useEffect(() => {

@@ -16,7 +16,8 @@ export default async function GroupEditPage({
 
   try {
     const res = await fetch(
-      `http://localhost:8080/api/private/study-group/operate/${postId}/detail`,
+      process.env.NEXT_PUBLIC_API_URL +
+        `private/study-group/operate/${postId}/detail`,
       {
         cache: "no-store",
         headers: {

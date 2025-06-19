@@ -192,9 +192,17 @@ export default function GroupCreatePage({
   useEffect(() => {
     if (errorMessage) {
       alert(errorMessage);
-      router.back(); // 이전 페이지로 이동
+      goBack(); // 이전 페이지로 이동
     }
   }, [errorMessage, router]);
+
+  const goBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/");
+    }
+  };
 
   useEffect(() => {
     if (meetingDay.length != 0) {

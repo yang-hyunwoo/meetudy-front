@@ -10,7 +10,7 @@ export default async function JoinedGroupOperatingPage() {
   const isAutoLogin = cookieStore.get("isAutoLogin")?.value;
   try {
     const res = await fetch(
-      `http://localhost:8080/api/private/study-group/operate/list`,
+      process.env.NEXT_PUBLIC_API_URL + `/private/study-group/operate/list`,
       {
         cache: "no-store",
         headers: {
@@ -21,6 +21,7 @@ export default async function JoinedGroupOperatingPage() {
     );
 
     const data = await res.json();
+    console.log(data);
     if (res.status !== 200 || !data.data) {
       return (
         <main className="min-h-screen p-6">

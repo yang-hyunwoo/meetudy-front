@@ -37,9 +37,9 @@ export default function RecommendedStudyGroups({
         <p className="text-muted-foreground text-sm">추천 그룹이 없습니다.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {groups.map((group) => (
+          {groups.map((group, index) => (
             <div
-              key={group.id}
+              key={`${group.id ?? "no-id"}-${index}`}
               className="flex items-center p-4 rounded-xl border bg-card text-card-foreground shadow-sm space-x-4"
             >
               {/* 이미지 */}

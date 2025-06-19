@@ -17,7 +17,7 @@ export default async function GroupDetailPage({ params }: PageProps) {
   const postId = params.id;
   try {
     const res = await fetch(
-      `http://localhost:8080/api/study-group/detail/${postId}`,
+      process.env.NEXT_PUBLIC_API_URL + `/study-group/detail/${postId}`,
       {
         cache: "no-store",
         headers: {

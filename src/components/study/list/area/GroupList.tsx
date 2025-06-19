@@ -151,7 +151,7 @@ export default function GroupList({ region }: { region: string }) {
           ),
         );
       }
-    } catch (error) {
+    } catch (error: any) {
       alert("강제퇴장 된 그룹은 참여 하실 수 없습니다.");
     }
   };

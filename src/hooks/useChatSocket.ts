@@ -72,6 +72,7 @@ export function useChatSocket(
   onUserEnter?: (userIds: number[]) => void,
   onUserJoin?: (newUser: User) => void,
   onUserLeave?: (newUser: User) => void,
+  errorMessage?: string,
 ) {
   const [messages, setMessages] = useState<ChatMessageDto[]>([]);
 
@@ -90,6 +91,7 @@ export function useChatSocket(
   const pathname = usePathname();
   const prevPath = useRef(pathname);
   const currentUserId = useCurrentUser()?.id;
+  const hasRun = useRef(false);
 
   useEffect(() => {
     groupIdRef.current = studyGroupId;
@@ -99,11 +101,12 @@ export function useChatSocket(
       .find((row) => row.startsWith("accessToken="))
       ?.split("=")[1];
     if (!accessToken) return;
-
+    if (errorMessage) return;
     const client = new Client({
       webSocketFactory: () =>
         new SockJS(
-          `http://localhost:8080/ws-chat?accessToken=${accessToken}&studyGroupId=${studyGroupId}`,
+          process.env.NEXT_PUBLIC_URL +
+            `/ws-chat?accessToken=${accessToken}&studyGroupId=${studyGroupId}`,
         ),
       reconnectDelay: 5000, // 자동 재연결 시도
       onConnect: () => {
@@ -243,7 +246,7 @@ export function useChatSocket(
     return () => {
       client.deactivate();
     };
-  }, [studyGroupId, currentUserId]);
+  }, [studyGroupId, currentUserId, errorMessage]);
 
   //새로고침 , 탭 이동 시 사용자 온라인, 오프라인 여부 체크
   useEffect(() => {
@@ -295,20 +298,22 @@ export function useChatSocket(
   useEffect(() => {
     if (hasFetchedRef.current) return;
     hasFetchedRef.current = true;
+    if (errorMessage) return;
     setMessages([]);
     setHasMore(true);
     setInitialLoadDone(false);
     pageRef.current = 1; // 첫 페이지 로드 이후부터 시작
     fetchMessages(0).then(() => setInitialLoadDone(true));
     NoticeList();
-  }, [studyGroupId]);
+  }, [studyGroupId, errorMessage]);
 
   useEffect(() => {
+    if (errorMessage) return;
     if (currentUserId !== undefined) {
       LinkList();
       DocumentList();
     }
-  }, [currentUserId]);
+  }, [currentUserId, errorMessage]);
 
   const NoticeList = async () => {
     const res = await api.get(`/private/chat/${studyGroupId}/notice/list`);
