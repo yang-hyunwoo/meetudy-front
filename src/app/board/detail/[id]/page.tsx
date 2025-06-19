@@ -16,13 +16,16 @@ export default async function BoardDetailPage({ params }: PageProps) {
   const isAutoLogin = cookieStore.get("isAutoLogin")?.value;
   const postId = params.id;
   try {
-    const res = await fetch(`http://localhost:8080/api/free-board/${postId}`, {
-      cache: "no-store",
-      headers: {
-        Authorization: `${accessToken}`,
-        Cookie: `refresh-token=${refreshToken}; isAutoLogin=${isAutoLogin}`,
+    const res = await fetch(
+      process.env.NEXT_PUBLIC_API_URL + `free-board/${postId}`,
+      {
+        cache: "no-store",
+        headers: {
+          Authorization: `${accessToken}`,
+          Cookie: `refresh-token=${refreshToken}; isAutoLogin=${isAutoLogin}`,
+        },
       },
-    });
+    );
 
     const data = await res.json();
 

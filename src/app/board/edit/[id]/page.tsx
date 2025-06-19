@@ -21,7 +21,7 @@ export default async function BoardEditPage({
 
   try {
     const res = await fetch(
-      `http://localhost:8080/api/private/free-board/${postId}`,
+      process.env.NEXT_PUBLIC_API_URL + `/private/free-board/${postId}`,
       {
         cache: "no-store",
         headers: {

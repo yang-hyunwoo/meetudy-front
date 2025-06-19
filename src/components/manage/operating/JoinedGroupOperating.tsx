@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import AttendanceDonutChart from "@/components/manage/joined/AttendanceDonutChart";
 import OperatingGroupCard from "@/components/manage/operating/OperatingGroupCard";
 import OperatingMemberCard from "@/components/manage/operating/OperatingMemberCard";
@@ -58,14 +58,24 @@ export default function JoinedGroupOperating({
   const [groupStatuses, setGroupStatuses] = useState<Record<string, boolean>>(
     {},
   );
+  const hasRun = useRef(false);
 
   const router = useRouter();
   useEffect(() => {
-    if (errorMessage) {
+    if (errorMessage && !hasRun.current) {
+      hasRun.current = true;
       alert(errorMessage);
-      router.back(); // 이전 페이지로 이동
+      goBack(); // 이전 페이지로 이동
     }
-  }, [errorMessage, router]);
+  }, [errorMessage]);
+
+  const goBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/");
+    }
+  };
 
   //승인
   const handleApproveMember = async (memberId: string, id: string) => {
