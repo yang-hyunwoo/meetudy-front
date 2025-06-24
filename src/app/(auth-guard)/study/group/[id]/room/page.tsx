@@ -15,7 +15,6 @@ export default async function GroupRoomPage({
   const isAutoLogin = cookieStore.get("isAutoLogin")?.value;
   const studyGroupId = params.id;
   try {
-    console.log(studyGroupId);
     const res = await fetch(
       process.env.NEXT_PUBLIC_API_URL +
         `/private/chat/${studyGroupId}/detail/auth`,
@@ -28,7 +27,6 @@ export default async function GroupRoomPage({
       },
     );
     const data = await res.json();
-    console.log(data);
     if (res.status !== 200 || !data.data) {
       return <GroupRoom errorMessage="그룹에 권한이 없습니다." />;
     }

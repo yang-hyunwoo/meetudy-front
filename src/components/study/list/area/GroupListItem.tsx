@@ -5,7 +5,6 @@ import { Users, Lock } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import GroupTagOverflow from "./GroupTagOverflow";
-import dayjs from "dayjs";
 
 interface GroupListItemProps {
   group: {

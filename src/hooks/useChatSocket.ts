@@ -89,9 +89,7 @@ export function useChatSocket(
   const pageRef = useRef(0);
   const hasFetchedRef = useRef(false);
   const pathname = usePathname();
-  const prevPath = useRef(pathname);
   const currentUserId = useCurrentUser()?.id;
-  const hasRun = useRef(false);
 
   useEffect(() => {
     groupIdRef.current = studyGroupId;
@@ -111,7 +109,7 @@ export function useChatSocket(
       reconnectDelay: 5000, // 자동 재연결 시도
       onConnect: () => {
         //접속시
-        console.log("✅ STOMP connected");
+        console.log(" STOMP connected");
         client.subscribe(`/topic/room.${studyGroupId}`, (message: IMessage) => {
           const jsonBody = JSON.parse(message.body);
           if (jsonBody.status === "ENTER") {

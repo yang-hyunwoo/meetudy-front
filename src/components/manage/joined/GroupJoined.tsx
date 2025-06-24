@@ -57,7 +57,6 @@ export default function GroupCalendarPage() {
   const [selectedDate, setSelectedDate] = useState<string | null>(todayStr);
   const [ongoingGroup, setOngoingGroup] = useState<JoinedGroup[]>([]);
   const [requestGroup, setRequestGroup] = useState<RequestGroup[]>([]);
-  const [endGroup, setEndGroup] = useState<JoinedGroup[]>([]);
   const { isLoggedIn } = useAuthContext();
   useEffect(() => {
     if (calendarRef.current) {
@@ -82,7 +81,6 @@ export default function GroupCalendarPage() {
   const groupList = async () => {
     const res = await api.get("/private/study-group/join/list");
     if (res.data.httpCode === 200) {
-      console.log(res.data);
       setOngoingGroup(res.data.data.ongoingGroup);
     } else {
       setOngoingGroup([]);

@@ -12,7 +12,6 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
-import { N } from "@fullcalendar/core/internal-common";
 
 interface User {
   memberId: number;

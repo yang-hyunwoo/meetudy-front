@@ -9,7 +9,7 @@ import DeleteAccountDialog from "@/components/mypage/DeleteAccountDialog";
 import { api } from "@/lib/axios";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { AuthProvider, useAuthContext } from "@/context/AuthContext";
+import { useAuthContext } from "@/context/AuthContext";
 
 interface Profile {
   id: string;
@@ -36,7 +36,6 @@ export default function MyPage() {
   const [editNicknameError, setEditNicknameError] = useState("");
   const [editPhone, setEditPhone] = useState("");
   const [editPhoneError, setEditPhoneError] = useState("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 

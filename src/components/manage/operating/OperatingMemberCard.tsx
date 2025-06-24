@@ -7,7 +7,7 @@ interface OperatingMemberCardProps {
   id: string;
   nickname: string;
   avatarUrl: string;
-  joinedAt: string; // 가입일
+  joinedAt: string;
   onClick: () => void;
   onKick: () => void;
 }
