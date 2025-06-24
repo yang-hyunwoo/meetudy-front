@@ -5,8 +5,6 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { api } from "@/lib/axios";
-import axios from "axios";
 
 interface ProfileCardProps {
   profile: {

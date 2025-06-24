@@ -5,7 +5,6 @@ import JoinedGroupCard from "@/components/manage/joined/JoinedGroupCard";
 import AttendanceDialog from "@/components/manage/joined/AttendanceDialog";
 import MembersDialog from "@/components/manage/joined/MembersDialog";
 import { api } from "@/lib/axios";
-import dayjs from "dayjs";
 import { useAuthContext } from "@/context/AuthContext";
 
 interface Member {
@@ -47,6 +46,7 @@ export default function JoinedGroupList({ groups }: JoinedGroupListProps) {
   const [members, setMembers] = useState<Member[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [groupList, setGroupList] = useState(groups);
+
   useEffect(() => {
     if (openAttendanceGroupId) {
       groupMemberRate();

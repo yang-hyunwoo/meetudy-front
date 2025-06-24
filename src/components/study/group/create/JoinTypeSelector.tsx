@@ -17,8 +17,8 @@ export default function JoinTypeSelector({
         가입 방식
       </label>
       <RadioGroup
-        value={value ? "true" : "false"} // 문자열로 넣되
-        onValueChange={(val) => onChange(val === "true")} // boolean으로 변환해서 반환
+        value={value ? "true" : "false"}
+        onValueChange={(val) => onChange(val === "true")}
         className="flex gap-4"
       >
         <div className="flex items-center space-x-2">

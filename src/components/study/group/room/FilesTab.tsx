@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "@/lib/axios";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 
 interface ChatDocumentDto {

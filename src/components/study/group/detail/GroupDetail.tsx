@@ -1,6 +1,5 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import { useState } from "react";
 import { MessageSquare } from "lucide-react";
 import OtpModal from "@/components/common/otp/OtpModal";
@@ -21,6 +20,7 @@ interface Comment {
   createdAt: string;
   isAuthor?: boolean;
 }
+
 interface GroupDetailProps {
   post?: any;
   errorMessage?: string;
@@ -33,6 +33,7 @@ export default function GroupDetail({ post, errorMessage }: GroupDetailProps) {
   const [otpErrorMsg, setOtpErrorMsg] = useState<string | null>(null);
   const [otpResetCounter, setOtpResetCounter] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     if (errorMessage) {
       alert(errorMessage);

@@ -32,7 +32,6 @@ export default async function MainPage() {
   );
 
   const groupListData = await groupList.json();
-  console.log(groupListData);
   const noticeListData = await noticeList.json();
 
   return (

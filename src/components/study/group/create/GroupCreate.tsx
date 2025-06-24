@@ -70,11 +70,6 @@ export default function GroupCreatePage({
   const ENDTIME_NOT_NULL = "스터디 그룹 종료 시간은 공백일 수 없습니다.";
   const MEETINGDAY_NOT_NULL = "스터디 모임 요일은 공백일 수 없습니다.";
   const MAXMEMBERCOUNT_NOT_NULL = "최대 인원 수는 공백일 수 없습니다.";
-  const MEETINGFREQUENCY_NOT_NULL =
-    "스터디 그룹 활동 빈도는 공백일 수 없습니다.";
-  const MEETINGSTARTTIME_NOT_NULL =
-    "스터디 모임 시작 시간은 공백일 수 없습니다.";
-  const MEETINGENDTIME_NOT_NULL = "스터디 모임 종료 시간은 공백일 수 없습니다.";
   const SECRETPASSWORD_NOT_NULL = "비밀방 비밀번호는 공백일 수 없습니다.";
   const SECRETPASSWORD_NOT_LENGTH = "비밀방 비밀번호 6자리 입력해주세요.";
 
@@ -106,7 +101,7 @@ export default function GroupCreatePage({
   const [maxMemberCountError, setMaxMemberCountError] = useState("");
 
   const [joinType, setJoinType] = useState<boolean>(
-    defaultValues?.joinType ?? false, // 자유가입이 기본
+    defaultValues?.joinType ?? false,
   );
 
   const [secret, setSecret] = useState<boolean>(defaultValues?.secret ?? false);
@@ -119,9 +114,6 @@ export default function GroupCreatePage({
     defaultValues?.allowComment ?? false,
   );
 
-  const [isLateFee, setIsLateFee] = useState<boolean>(
-    defaultValues?.isLateFee ?? false,
-  );
   const [lateFeeAmount, setLateFeeAmount] = useState(
     defaultValues?.lateFeeAmount || "",
   );
@@ -144,9 +136,9 @@ export default function GroupCreatePage({
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
     defaultValues?.thumbnailFileUrl ?? null,
   );
-  const [thumbnailFileId, setThumbnailFileId] = useState<string | undefined>(
-    defaultValues?.fileId ?? undefined,
-  );
+  // const [thumbnailFileId, setThumbnailFileId] = useState<string | undefined>(
+  //   defaultValues?.fileId ?? undefined,
+  // );
   const [hasThumbnail, setHasThumbnail] = useState<boolean>(
     !!defaultValues?.fileId,
   );
