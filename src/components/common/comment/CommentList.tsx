@@ -71,7 +71,7 @@ export default function StudyCommentList({
               className="text-sm bg-muted dark:bg-zinc-800"
             />
           ) : (
-            <p className="text-sm whitespace-pre-line text-gray-800 dark:text-gray-300">
+            <p className="text-sm whitespace-pre-line break-words text-gray-800 dark:text-gray-300">
               {c.content}
             </p>
           )}
