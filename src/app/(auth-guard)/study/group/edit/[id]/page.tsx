@@ -17,7 +17,7 @@ export default async function GroupEditPage({
   try {
     const res = await fetch(
       process.env.NEXT_PUBLIC_API_URL +
-        `private/study-group/operate/${postId}/detail`,
+        `/private/study-group/operate/${postId}/detail`,
       {
         cache: "no-store",
         headers: {
@@ -27,6 +27,7 @@ export default async function GroupEditPage({
       },
     );
     const data = await res.json();
+
     if (res.status !== 200 || !data.data) {
       return (
         <GroupCreate errorMessage="그룹이 존재하지 않거나 삭제되었습니다." />

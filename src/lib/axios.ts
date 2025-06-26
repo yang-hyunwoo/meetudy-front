@@ -13,6 +13,10 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+const deleteCookie = (name: string) => {
+  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+};
+
 api.interceptors.response.use(
   (response) => {
     const newToken = response.headers["authorization"];
@@ -33,8 +37,9 @@ api.interceptors.response.use(
       error?.response.data.code == "SC_ERR404"
     ) {
       localStorage.removeItem("accessToken");
-      document.cookie =
-        "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      deleteCookie("accessToken");
+      deleteCookie("refresh-token");
+      deleteCookie("isAutoLogin");
     }
     if (requestUrl.includes("/user/me")) {
       return Promise.reject(error);

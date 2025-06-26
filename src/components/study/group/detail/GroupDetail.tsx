@@ -50,13 +50,15 @@ export default function GroupDetail({ post, errorMessage }: GroupDetailProps) {
   };
 
   useEffect(() => {
-    if (post.allowComment) {
-      CommentList(post.id);
+    if (post && post.id) {
+      if (post.allowComment) {
+        CommentList(post.id);
+      }
+      if (isLoggedIn) {
+        joinGroupAxios(post.id);
+      }
     }
-    if (isLoggedIn) {
-      joinGroupAxios(post.id);
-    }
-  }, [post.id]);
+  }, [post, isLoggedIn]);
 
   const CommentList = async (postId: any) => {
     const params: any = {
@@ -77,10 +79,14 @@ export default function GroupDetail({ post, errorMessage }: GroupDetailProps) {
   };
 
   const joinGroupAxios = async (id: string) => {
+    console.log("1111");
     try {
       const res = await api.post("/study-group/my-status", [id]);
 
       if (res.data.httpCode === 200) {
+        console.log("222");
+
+        console.log(res.data.data[0].joinStatus);
         if (res.data.data[0] != "") {
           setJoinStatus(res.data.data[0].joinStatus);
         }

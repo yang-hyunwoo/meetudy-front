@@ -549,7 +549,9 @@ export default function GroupCreatePage({
   };
   return (
     <div className="max-w-2xl mx-auto py-12 px-4">
-      <h1 className="text-2xl font-bold mb-6">스터디 그룹 생성</h1>
+      <h1 className="text-2xl font-bold mb-6">
+        {defaultValues?.studyGroupId ? "스터디 그룹 수정" : "스터디 그룹 생성"}
+      </h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* 썸네일 업로드 */}

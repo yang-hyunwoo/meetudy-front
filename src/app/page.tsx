@@ -21,7 +21,7 @@ export default async function MainPage() {
   );
 
   const noticeList = await fetch(
-    process.env.NEXT_PUBLIC_API_URL + `main/notice/list`,
+    process.env.NEXT_PUBLIC_API_URL + `/main/notice/list`,
     {
       cache: "no-store",
       headers: {

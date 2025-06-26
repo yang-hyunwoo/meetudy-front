@@ -1,11 +1,45 @@
-<div class="markdown-heading" dir="auto">
- <h2 tabindex="-1" class="heading-element" dir="auto">프로젝트 초기 설정</h2>
-</div>
-<p>npx create-next-app@latest meetudy-frontend</p>
+<h1 align="center">
+  <img src="./Settings/image/meetudy-logo2.png" alt="로고" width="100" style="vertical-align: middle;" />
+  <br />
+  <strong>Meetudy</strong> - 당신의 스터디를 더 스마트하게 💡
+</h1>
 
-![test](./markdown/setting.PNG)
+> 🤝 **혼자보다는 함께할 때 더 큰 동기부여가 생깁니다.**  
+> ✨ 구성원 간 실시간 피드백과 격려를 주고받으며,  
+> 🚀 함께 성장해 보세요.
 
-라이브러리 다운 : npm install --legacy-peer-deps
+---
+
+## 📝 프로젝트 개요
+
+**Meetudy**는 스터디 그룹 관리, 실시간 채팅, 게시판, 알림 기능 등을 제공하는  
+협업 중심의 **스터디 플랫폼**입니다.  
+스터디 구성원은 함께 학습 내용을 공유하고 피드백을 주고받으며  
+더 효율적으로 성장할 수 있습니다.
+
+---
+
+## 📚 목차
+
+- [⚙️ 개발 환경](#️-개발-환경)
+- [🚀 실행 방법](./Settings/setting/readme.md)
+- [✨ 주요 기능](#-주요-기능)
+- [🔐 로그인 및 인증](./Settings/auth/readme.md)
+- [🏠 메인](./Settings/main/readme.md)
+- [👥 스터디 그룹](./Settings/studygroup/list.md)
+  - [📋 스터디 그룹 목록](./Settings/studygroup/list.md)
+  - [📄 스터디 그룹 상세](./Settings/studygroup/detail.md)
+  - [📝 스터디 그룹 등록](./Settings/studygroup/insert.md)
+  - [🛠️ 스터디 그룹 수정](./Settings/studygroup/update.md)
+- [📂 스터디 그룹 관리](./Settings/studygroupmanage/readme.md)
+- [❓ 문의 사항](./Settings/qna/readme.md)
+- [💬 자유 게시판](./Settings/board/readme.md)
+- [👤 내 정보](./Settings/myinfo/readme.md)
+- [🔔 알림](./Settings/notification/readme.md)
+
+---
+
+## ⚙️ 개발 환경
 
 ```
 vs code settings.json
@@ -68,3 +102,16 @@ docker-compose -f compose.dev.yml up --build
 <li>문법 검사 : <a href="https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint" rel="nofollow">ESLint</a>, <a href="https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode" rel="nofollow">Prettier</a>, <a href="https://marketplace.visualstudio.com/items?itemName=Tobermory.es6-string-html" rel="nofollow">ES6 String HTML</a></li>
 <li>실습 환경 보조 : <a href="https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer" rel="nofollow">Live Server</a></li>
 </ul>
+```
+
+라이브러리 다운 : npm install --legacy-peer-deps
+
+---
+
+## ✨ 주요 기능
+
+- ✅ 스터디 그룹 생성 및 관리
+- 💬 실시간 채팅 (WebSocket 기반)
+- 🔔 사용자별 알림 시스템 (Redis Pub/Sub)
+- 🧾 자유 게시판 / 문의 게시판
+- 🔐 JWT 기반 로그인 & 소셜 로그인 (OAuth2)
