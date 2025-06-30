@@ -230,7 +230,8 @@ export default function GroupRoomLayout({
     setLinkInput("");
   };
 
-  const handleSendDM = () => {
+  const handleSendDM = async () => {
+    console.log(selectedUser);
     if (!selectedUser || dmMessage.trim() === "") {
       alert("메시지를 입력해주세요.");
       return;
@@ -238,10 +239,26 @@ export default function GroupRoomLayout({
 
     console.log(`👉 ${selectedUser.nickname} 에게 쪽지 전송:`, dmMessage);
 
-    // 쪽지 전송 후 초기화
-    setDmModalOpen(false);
-    setDmMessage("");
-    setSelectedUser(null);
+    const MypageMessageWriteReqDto = {
+      content: dmMessage,
+      receiverId: selectedUser.memberId,
+    };
+    try {
+      const res = await api.post(
+        "/private/mypage/message/send",
+        MypageMessageWriteReqDto,
+      );
+      if (res.data.httpCode == 201) {
+      }
+    } catch (error) {
+      console.error(error);
+      alert("잠시후 다시 시도 해 주세요.");
+    } finally {
+      // 쪽지 전송 후 초기화
+      setDmModalOpen(false);
+      setDmMessage("");
+      setSelectedUser(null);
+    }
   };
 
   //공지사항 작성
@@ -332,7 +349,7 @@ export default function GroupRoomLayout({
           showSidebar={showSidebar}
           onToggleSidebar={() => setShowSidebar(!showSidebar)}
           onDmClick={(user) => {
-            setSelectedUser(null);
+            setSelectedUser(user);
             setDmModalOpen(true);
           }}
         />

@@ -12,6 +12,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 interface User {
   memberId: number;
@@ -34,6 +35,7 @@ export default function UserListSidebar({
   onToggleSidebar,
   onDmClick,
 }: UserListSidebarProps) {
+  const currentUserId = useCurrentUser()?.id;
   return (
     <>
       {/*  모바일 토글 버튼 */}
@@ -98,15 +100,19 @@ export default function UserListSidebar({
                     ⋮
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-36 p-2 text-sm">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start"
-                    onClick={() => onDmClick(user)}
-                  >
-                    쪽지 보내기
-                  </Button>
-                </PopoverContent>
+                {user.memberId !== currentUserId && (
+                  <PopoverContent className="w-36 p-2 text-sm">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => {
+                        onDmClick(user);
+                      }}
+                    >
+                      쪽지 보내기
+                    </Button>
+                  </PopoverContent>
+                )}
               </Popover>
 
               {/* 온라인/오프라인 상태 */}
