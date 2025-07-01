@@ -1,5 +1,7 @@
 "use client";
 
+import { NOTICE_TYPE_DISPLAY_MAP } from "@/enum/contactEnum";
+
 interface NoticeHeaderProps {
   title: string;
   createdAt: string;
@@ -20,7 +22,8 @@ export default function NoticeHeader({
         </div>
         {category && (
           <span className="inline-block text-xs font-medium px-2 py-1 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-            {category}
+            {}
+            {NOTICE_TYPE_DISPLAY_MAP[category] ?? category}
           </span>
         )}
       </div>
