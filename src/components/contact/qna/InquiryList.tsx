@@ -26,7 +26,8 @@ export default function InquiryList() {
     const fetchInquiries = async () => {
       try {
         const res = await api.get("/private/contact/qna/list");
-        const content = res?.data?.data?.content ?? [];
+        const content = res?.data?.data ?? [];
+        console.log(content);
         const formattedData = content.map((item: any) => ({
           ...item,
           status: item.answerAt ? "답변완료" : "답변대기",

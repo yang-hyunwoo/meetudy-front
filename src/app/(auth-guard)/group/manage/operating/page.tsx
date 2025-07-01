@@ -21,6 +21,7 @@ export default async function JoinedGroupOperatingPage() {
     );
 
     const data = await res.json();
+    console.log(data);
     if (res.status !== 200 || !data.data) {
       return (
         <main className="min-h-screen p-6">

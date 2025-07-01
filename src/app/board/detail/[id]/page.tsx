@@ -17,7 +17,7 @@ export default async function BoardDetailPage({ params }: PageProps) {
   const postId = params.id;
   try {
     const res = await fetch(
-      process.env.NEXT_PUBLIC_API_URL + `free-board/${postId}`,
+      process.env.NEXT_PUBLIC_API_URL + `/free-board/${postId}`,
       {
         cache: "no-store",
         headers: {
