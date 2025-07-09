@@ -4,9 +4,7 @@ import { cookies } from "next/headers";
 import { RequestCookies } from "next/dist/compiled/@edge-runtime/cookies";
 
 interface PageProps {
-  params: {
-    id: string;
-  };
+  params: Promise<{ id: string }>; // params를 Promise로 정의
 }
 
 export default async function GroupDetailPage({ params }: PageProps) {
@@ -14,7 +12,8 @@ export default async function GroupDetailPage({ params }: PageProps) {
   const accessToken = cookieStore.get("accessToken")?.value;
   const refreshToken = cookieStore.get("refresh-token")?.value;
   const isAutoLogin = cookieStore.get("isAutoLogin")?.value;
-  const postId = params.id;
+  const resolvedParams = await params;
+  const postId = resolvedParams?.id;
   try {
     const res = await fetch(
       process.env.NEXT_PUBLIC_API_URL + `/study-group/detail/${postId}`,

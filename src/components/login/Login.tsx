@@ -23,6 +23,12 @@ export default function Login() {
   const redirectTo = searchParams.get("redirectTo") || "/";
   useEffect(() => setMounted(true), []);
   useEffect(() => {
+    console.log("✅ API_URL:", process.env.NEXT_PUBLIC_API_URL);
+    console.log("✅ NEXT_PUBLIC_URL:", process.env.NEXT_PUBLIC_URL);
+    console.log(
+      "✅ NEXT_PUBLIC_RECAPTCHA_SITE_KEY:",
+      process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
+    );
     localStorage.removeItem("accessToken");
     document.cookie =
       "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";

@@ -3,21 +3,17 @@ import BoardForm from "@/components/board/write/BoardWrite";
 import { cookies } from "next/headers";
 import { RequestCookies } from "next/dist/compiled/@edge-runtime/cookies";
 
-interface BoardFormProps {
-  defaultTitle: string;
-  defaultContent: string;
-  postId: string;
+interface PageProps {
+  params: Promise<{ id: string }>; // params를 Promise로 정의
 }
-export default async function BoardEditPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+
+export default async function BoardEditPage({ params }: PageProps) {
   const cookieStore = cookies() as unknown as RequestCookies;
   const accessToken = cookieStore.get("accessToken")?.value;
   const refreshToken = cookieStore.get("refresh-token")?.value;
   const isAutoLogin = cookieStore.get("isAutoLogin")?.value;
-  const postId = params.id;
+  const resolvedParams = await params;
+  const postId = resolvedParams?.id;
 
   try {
     const res = await fetch(

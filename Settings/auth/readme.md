@@ -5,10 +5,10 @@
 
 ## 🧭 이 페이지에서 다루는 내용
 
-  - [✅ 인증 절차](#-인증-절차)
-  - [🗃️ 토큰 저장 방식 요약](#️-토큰-저장-방식-요약)
-  - [💿 AccessToken 재발급 방식](#-accesstoken-재발급-방식)
-  - [💿 Access Token 발급 흐름](#-access-token-발급-흐름)
+- [✅ 인증 절차](#-인증-절차)
+- [🗃️ 토큰 저장 방식 요약](#️-토큰-저장-방식-요약)
+- [💿 AccessToken 재발급 방식](#-accesstoken-재발급-방식)
+- [💿 Access Token 발급 흐름](#-access-token-발급-흐름)
 
 ![/Settings/image/authLogin.png](../../Settings/image/authLogin.png)
 
