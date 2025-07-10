@@ -2,6 +2,7 @@ import axios from "axios";
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
+  // baseURL: "/api", //운영 배포 시에 활성화
   withCredentials: true, //  쿠키 자동 포함 (refreshToken 용)
 });
 

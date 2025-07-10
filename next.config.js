@@ -16,6 +16,14 @@ const nextConfig = {
   images: {
     domains: ["res.cloudinary.com"],
   },
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*", // 프론트에서 이 경로로 요청하면
+        destination: "https://meetudy-backend.fly.dev/api/:path*", // 실제 백엔드로 전달됨
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;
