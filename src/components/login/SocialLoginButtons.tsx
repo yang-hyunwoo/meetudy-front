@@ -9,12 +9,18 @@ const providers = [
   { id: "google", label: "Google" },
 ];
 
+const signIn = (type: string) => {
+  console.log(type);
+  window.location.href = `http://localhost:8080/oauth2/authorization/${type}`;
+};
+
 export default function SocialLoginButtons() {
   return (
     <div className="grid grid-cols-3 gap-2">
       {providers.map(({ id, label }) => (
         <Button
           key={id}
+          onClick={() => signIn(id)}
           variant="outline"
           className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
         >

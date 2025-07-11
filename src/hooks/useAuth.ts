@@ -6,7 +6,6 @@ export function useAuth() {
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-
     if (token) {
       api
         .get("/user/me")

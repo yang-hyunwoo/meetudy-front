@@ -11,7 +11,7 @@ interface ProfileCardProps {
     id: string;
     nickname: string;
     email: string;
-    phoneNumber: string;
+    phoneNumber: string | null;
     profileImageId?: string;
     profileImageUrl?: string;
     providerType: string;
@@ -32,7 +32,7 @@ export default function ProfileCard({
   setEditNicknameError,
 }: ProfileCardProps) {
   const [editNickname, setEditNickname] = useState(profile.nickname);
-  const [editPhone, setEditPhone] = useState(profile.phoneNumber);
+  const [editPhone, setEditPhone] = useState(profile.phoneNumber ?? "");
   const [isEditing, setIsEditing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -101,7 +101,7 @@ export default function ProfileCard({
           <div>
             <label className="block text-sm font-medium">휴대폰 번호</label>
             <Input
-              value={editPhone}
+              value={editPhone ?? ""}
               onChange={(e) => setEditPhone(e.target.value)}
               disabled={!isEditing}
               maxLength={11}

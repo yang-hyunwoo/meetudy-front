@@ -2,6 +2,7 @@
   <img src="./Settings/image/meetudy-logo2.png" alt="로고" width="100" style="vertical-align: middle;" />
   <br />
   <strong>Meetudy</strong> - 당신의 스터디를 더 스마트하게 💡
+  
  <br />
   <a href="https://meetudy.fly.dev">https://meetudy.fly.dev</a>
 </h1>
@@ -13,6 +14,7 @@
 ---
 
 > 🔑 **테스트 계정 안내**
+>
 > - 이메일: `test@meetudy.com`
 > - 비밀번호: `test1234@`
 

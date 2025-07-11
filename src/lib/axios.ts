@@ -2,7 +2,6 @@ import axios from "axios";
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  // baseURL: "/api", //운영 배포 시에 활성화
   withCredentials: true, //  쿠키 자동 포함 (refreshToken 용)
 });
 
@@ -30,6 +29,11 @@ api.interceptors.response.use(
   async (error: any) => {
     // ✅ 요청 URL 확인
     const requestUrl = error.config?.url ?? "";
+
+    const currentPath = window.location.pathname;
+    if (currentPath === "/login") {
+      return Promise.reject(error);
+    }
 
     if (
       error?.response.data.code == "SC_ERR400" ||

@@ -13,13 +13,11 @@ export default function AuthLayout({
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-
     if (!token) {
       const currentPath = window.location.pathname;
       router.replace(`/login?redirectTo=${currentPath}`);
       return;
     }
-
     api
       .get("/user/me")
       .then(() => {

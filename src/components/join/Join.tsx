@@ -61,7 +61,6 @@ export default function SignupForm() {
   const NAME_NOT_NULL = "이름은 공백일 수 없습니다.";
   const NICKNAME_NOT_NULL = "닉네임은 공백일 수 없습니다.";
   const BIRTHDAY_NOT_NULL = "생일은 공백일 수 없습니다.";
-  const HPNUM_NOT_NULL = "휴대폰 번호는 공백일 수 없습니다.";
   const PASSWORD_NOT_NULL = "비밀번호는 공백일 수 없습니다.";
   /**
    * 이메일 포커스 유효성 검사
@@ -141,11 +140,13 @@ export default function SignupForm() {
    */
   const handleHpNumBlur = () => {
     if (!hpNum.trim()) {
-      setHpNumError(HPNUM_NOT_NULL);
-    } else if (!isValidPhone(hpNum)) {
-      setHpNumError("휴대폰 번호는 010으로 시작해야 합니다.");
-    } else if (hpNum.length != 11) {
-      setHpNumError("휴대폰 번호는 11자리여야 합니다.");
+      if (!isValidPhone(hpNum)) {
+        setHpNumError("휴대폰 번호는 010으로 시작해야 합니다.");
+      } else if (hpNum.length != 11) {
+        setHpNumError("휴대폰 번호는 11자리여야 합니다.");
+      } else {
+        setHpNumError("");
+      }
     } else {
       setHpNumError("");
     }
@@ -234,7 +235,6 @@ export default function SignupForm() {
       { name: "name", value: name, message: NAME_NOT_NULL },
       { name: "nickName", value: nickname, message: NICKNAME_NOT_NULL },
       { name: "birth", value: birthday, message: BIRTHDAY_NOT_NULL },
-      { name: "phonenNumber", value: hpNum, message: HPNUM_NOT_NULL },
       { name: "password", value: password, message: PASSWORD_NOT_NULL },
       {
         name: "passwordConfirm",

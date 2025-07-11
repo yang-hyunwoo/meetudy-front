@@ -42,7 +42,7 @@ function LayoutContents({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("accessToken");
       document.cookie =
         "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-      checkAuth(); // ⭐ 상태 업데이트
+      checkAuth();
       window.location.href = "/";
     } catch (err) {
       console.error("로그아웃 실패", err);

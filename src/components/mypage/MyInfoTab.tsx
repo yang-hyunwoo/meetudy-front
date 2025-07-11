@@ -125,11 +125,7 @@ export default function MyPage() {
       setEditNicknameError(NICKNAME_REGEX_VALID);
       return false;
     }
-    if (!phone.trim()) {
-      setEditPhoneError(PHONE_NOT_NULL);
-      return false;
-    }
-    if (phone.length != 11) {
+    if (phone.trim() && phone.length !== 11) {
       setEditPhoneError(PHONE_NOT_LENGTH);
       return false;
     }
