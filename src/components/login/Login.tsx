@@ -43,9 +43,9 @@ export default function Login() {
     try {
       const res = await api.post("/login", { email, password });
       const accessToken = res.headers["authorization"];
-      // localStorage.setItem("accessToken", accessToken);
-      // document.cookie = `accessToken=${accessToken}; path=/;`;
-      // window.location.href = redirectTo;
+      localStorage.setItem("accessToken", accessToken);
+      document.cookie = `accessToken=${accessToken}; path=/;`;
+      window.location.href = redirectTo;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const message =

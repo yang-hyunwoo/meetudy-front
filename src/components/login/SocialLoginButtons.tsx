@@ -10,8 +10,8 @@ const providers = [
 ];
 
 const signIn = (type: string) => {
-  console.log(type);
-  window.location.href = `http://localhost:8080/oauth2/authorization/${type}`;
+  //window.location.href = `http://localhost:8080/oauth2/authorization/${type}`;
+  window.location.href = `https://meetudy-backend.fly.dev/oauth2/authorization/${type}`;
 };
 
 export default function SocialLoginButtons() {

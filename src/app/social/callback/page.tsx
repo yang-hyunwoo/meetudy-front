@@ -17,7 +17,7 @@ export default function SocialCallbackPage() {
 
     // 0.5초 후 리디렉트
     const timeout = setTimeout(() => {
-      // router.replace("/");
+      router.replace("/");
     }, 500);
 
     return () => clearTimeout(timeout);
